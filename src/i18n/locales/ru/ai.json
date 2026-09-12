@@ -1,0 +1,18 @@
+{
+  "aiAnalysis": "ИИ-анализ",
+  "analyzeBusiness": "Проанализировать бизнес",
+  "financialAnalysis": "Финансовый анализ",
+  "growthAnalysis": "Анализ роста",
+  "riskAnalysis": "Анализ рисков",
+  "valuationEstimate": "Оценка стоимости",
+  "aiInsights": "Аналитика ИИ",
+  "analysisInProgress": "Анализ выполняется",
+  "analysisCompleted": "Анализ завершён",
+  "analysisFailed": "Не удалось выполнить анализ",
+  "dataOrigin": {
+    "verifiedData": "Проверенные данные",
+    "sellerProvidedData": "Данные от продавца",
+    "aiInference": "Вывод ИИ",
+    "unknown": "Неизвестно"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "verification": "Verification",
+  "identityVerification": "Identity verification",
+  "businessVerification": "Business verification",
+  "ownershipVerification": "Ownership verification",
+  "revenueVerification": "Revenue verification",
+  "financialVerification": "Financial verification",
+  "domainVerification": "Domain verification",
+  "trafficVerification": "Traffic verification",
+  "status": {
+    "pending": "Pending",
+    "inReview": "In review",
+    "verified": "Verified",
+    "rejected": "Rejected",
+    "expired": "Expired"
+  },
+  "unableToLoad": "Unable to load verification status",
+  "toastSubmitted": "Verification submitted successfully",
+  "noVerificationsYet": "No verifications yet",
+  "types": {
+    "identity": "Identity",
+    "business": "Business",
+    "ownership": "Ownership",
+    "revenue": "Revenue",
+    "traffic": "Traffic",
+    "financial": "Financial",
+    "domain": "Domain"
+  },
+  "page": {
+    "title": "Trust & Verification Center",
+    "description": "Complete all 5 verification layers to earn the 2026 Institutional Trust Score badge on your listings."
+  },
+  "trustScore": "Current Account Trust Score: {{score}}% (Tier 1 Verified)",
+  "trustScoreDescription": "Your listings receive priority search ranking and instant LOI diligence access.",
+  "verifiedPartner": "Verified Partner",
+  "auditStagesTitle": "Verification Audit Stages",
+  "auditStagesDescription": "Audited automatically and cross-verified by VentureMarket Operations",
+  "trustRating": "{{score}}% Trust Rating",
+  "sixLayerAuditTitle": "6-Layer Trust & Verification Audit",
+  "sixLayerAuditDescription": "Every layer independently audited by VentureMarket Escrow & Verification Operations",
+  "verifiedCheck": "Verified ✓",
+  "auditedLabel": "Audited:",
+  "activeLabel": "Active",
+  "pendingLabel": "Not yet verified",
+  "notSubmitted": "Not submitted",
+  "notYetVerified": "Not yet verified",
+  "layers": {
+    "identity": {
+      "title": "Founder Identity & KYC",
+      "description": "Government-issued passport & biometric liveness verification completed."
+    },
+    "business": {
+      "title": "Corporate Legal Entity",
+      "description": "Certificate of Good Standing & registered business incorporation confirmed."
+    },
+    "ownership": {
+      "title": "Business Ownership",
+      "description": "Confirms the seller is the legal owner or an authorized representative of the business."
+    },
+    "revenue": {
+      "title": "Stripe Automated Revenue Sync",
+      "description": "Direct read-only API connection to Stripe billing. 24 months of gross & net transactions verified."
+    },
+    "financial": {
+      "title": "Bank & Tax Reconciliation",
+      "description": "Corporate bank statements matched 1:1 against reported tax return filings."
+    },
+    "domain": {
+      "title": "Domain DNS & Asset Ownership",
+      "description": "Cryptographic DNS TXT record validated with registrar ownership verification."
+    },
+    "traffic": {
+      "title": "Traffic & User Analytics",
+      "description": "Google Analytics 4 & server logs connected to verify monthly active visitors."
+    }
+  },
+  "steps": {
+    "identity": {
+      "title": "1. Founder Identity & Biometric KYC",
+      "description": "Passport and driver license validation with automated fraud check."
+    },
+    "entity": {
+      "title": "2. Corporate Entity Registration",
+      "description": "Delaware / UK / EU corporate registry matching and certificate of good standing."
+    },
+    "revenue": {
+      "title": "3. Stripe / Payment Gateway Sync",
+      "description": "Automated read-only API integration auditing 24-month gross & net volume."
+    },
+    "domain": {
+      "title": "4. Domain DNS & Repository Ownership",
+      "description": "DNS TXT record validation and GitHub organization ownership."
+    },
+    "traffic": {
+      "title": "5. Analytics Server Logs",
+      "description": "Google Analytics 4 & Plausible traffic stream verification."
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "admin": "Идоракунӣ",
+  "adminPanel": "Панели идоракунӣ",
+  "exitToApp": "Баромадан ба барнома",
+  "overview": "Шарҳи умумӣ",
+  "dashboard": "Лавҳаи идора",
+  "users": "Корбарон",
+  "businesses": "Бизнесҳо",
+  "listings": "Эълонҳо",
+  "verification": "Тасдиқ",
+  "reports": "Шикоятҳо",
+  "auditLogs": "Сабти назорат",
+  "review": "Баррасӣ",
+  "approve": "Тасдиқ кардан",
+  "reject": "Рад кардан",
+  "suspend": "Боздоштан",
+  "restore": "Барқарор кардан",
+  "delete": "Нест кардан",
+  "unableToLoad": "Боркунии маълумоти идоракунӣ ғайриимкон аст",
+  "toastApproved": "Бомуваффақият тасдиқ шуд",
+  "toastRejected": "Бомуваффақият рад шуд",
+  "toastSuspended": "Бомуваффақият боздошта шуд",
+  "toastRestored": "Бомуваффақият барқарор шуд",
+  "login": {
+    "title": "VentureMarket Admin",
+    "subtitle": "Бо ҳисоби маъмур ворид шавед",
+    "signingIn": "Воридшавӣ идома дорад…",
+    "accessDenied": "Ин ҳисоб ҳуқуқи маъмуриятро надорад.",
+    "invalidCredentials": "Почта ё парол нодуруст аст."
+  },
+  "dashboardPage": {
+    "title": "Лавҳаи идора",
+    "description": "Навбати баррасӣ, тасдиқи тасдиқот ва сабти фаъолият."
+  },
+  "usersPage": {
+    "title": "Корбарон",
+    "description": "Ҳамаи ҳисобҳои сабтшудаи VentureMarket."
+  },
+  "businessesPage": {
+    "title": "Бизнесҳо",
+    "description": "Баррасӣ, тасдиқ, рад ё боздоштани эълонҳои бизнес."
+  },
+  "verificationsPage": {
+    "title": "Тасдиқ",
+    "description": "Дархостҳои тасдиқи шахсият, моликият ва даромад."
+  },
+  "reportsPage": {
+    "title": "Шикоятҳо",
+    "description": "Шикоятҳо дар бораи мазмун ва ҳисобҳо аз ҷониби корбарон."
+  },
+  "auditLogsPage": {
+    "title": "Сабти назорат",
+    "description": "Сабти тағйирнопазири амалҳои маъмурӣ ва ҳисобӣ."
+  },
+  "columns": {
+    "email": "Почта",
+    "role": "Нақш",
+    "status": "Ҳолат",
+    "created": "Эҷодшуда",
+    "lastLogin": "Воридшавии охирин",
+    "actions": "Амалҳо",
+    "business": "Бизнес",
+    "owner": "Соҳиб",
+    "country": "Кишвар",
+    "askingPrice": "Нархи пешниҳодшуда",
+    "type": "Навъ",
+    "expires": "Мӯҳлат",
+    "reason": "Сабаб",
+    "target": "Объект",
+    "action": "Амал",
+    "ipAddress": "Суроғаи IP",
+    "date": "Сана"
+  },
+  "empty": {
+    "users": "Корбар ёфт нашуд",
+    "businesses": "Бизнес ёфт нашуд",
+    "verifications": "Дархости тасдиқ нест",
+    "reports": "Шикоят нест",
+    "auditLogs": "Сабт дар сабти назорат нест"
+  },
+  "confirm": {
+    "approveTitle": "Ин бизнесро тасдиқ кунед?",
+    "approveDescription": "Эълон дар бозори ҷамъиятӣ нашр карда мешавад.",
+    "rejectTitle": "Ин бизнесро рад кунед?",
+    "rejectDescription": "Соҳиб огоҳ карда мешавад ва эълон нашр намешавад.",
+    "suspendTitle": "Ин бизнесро боздоред?",
+    "suspendDescription": "Эълон дарҳол аз нашр бардошта мешавад.",
+    "reasonLabel": "Сабаб (ихтиёрӣ)",
+    "reasonPlaceholder": "Барои қарор изоҳ илова кунед…"
+  }
+}

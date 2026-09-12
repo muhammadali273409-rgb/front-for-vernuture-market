@@ -1,0 +1,55 @@
+{
+  "settings": "Настройки",
+  "profile": "Профиль",
+  "security": "Безопасность",
+  "notifications": "Уведомления",
+  "language": "Язык",
+  "appearance": "Внешний вид",
+  "theme": "Тема",
+  "light": "Светлая",
+  "dark": "Тёмная",
+  "system": "Системная",
+  "sessions": "Сеансы",
+  "changePassword": "Изменить пароль",
+  "saveChanges": "Сохранить изменения",
+  "currentPassword": "Текущий пароль",
+  "newPassword": "Новый пароль",
+  "toastProfileUpdated": "Настройки профиля успешно обновлены",
+  "toastPasswordChanged": "Пароль успешно изменён",
+  "toastPreferencesSaved": "Настройки сохранены",
+  "demoBio": "Оператор прямых инвестиций и руководитель поискового фонда.",
+  "page": {
+    "title": "Настройки аккаунта и платформы",
+    "description": "Управляйте профилем, двухфакторной защитой, подключёнными платёжными интеграциями и региональными настройками."
+  },
+  "tabs": {
+    "profile": "Профиль",
+    "security": "Безопасность и 2FA",
+    "integrations": "Подключённые аккаунты",
+    "preferences": "Регион и уведомления"
+  },
+  "profileTab": {
+    "identityTitle": "Публичные данные и данные для сделок",
+    "identityDescription": "Ваши проверенные данные, видимые контрагентам в комнатах сделок",
+    "companyEntity": "Компания / организация",
+    "professionalBio": "Профессиональная биография"
+  },
+  "securityTab": {
+    "twoFactorTitle": "Двухфакторная аутентификация (2FA)",
+    "twoFactorDescription": "Требовать аппаратный TOTP / приложение-аутентификатор для доступа к документам комнаты сделки",
+    "activeFido2": "Активно (FIDO2)",
+    "watermarkTitle": "Подпись водяным знаком",
+    "watermarkDescription": "Автоматически проставлять данные вашей организации и отметку времени на конфиденциальных загрузках"
+  },
+  "integrationsTab": {
+    "stripeTitle": "Stripe Connect API",
+    "stripeDescription": "Подключено для автоматической проверки выручки за последние 24 месяца",
+    "analyticsTitle": "Google Analytics 4 / Plausible",
+    "analyticsDescription": "Подключено для сверки данных о трафике пользователей",
+    "connected": "Подключено"
+  },
+  "preferencesTab": {
+    "platformLanguage": "Язык платформы",
+    "displayCurrency": "Валюта отображения"
+  }
+}

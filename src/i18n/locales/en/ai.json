@@ -1,0 +1,18 @@
+{
+  "aiAnalysis": "AI Analysis",
+  "analyzeBusiness": "Analyze business",
+  "financialAnalysis": "Financial analysis",
+  "growthAnalysis": "Growth analysis",
+  "riskAnalysis": "Risk analysis",
+  "valuationEstimate": "Valuation estimate",
+  "aiInsights": "AI insights",
+  "analysisInProgress": "Analysis in progress",
+  "analysisCompleted": "Analysis completed",
+  "analysisFailed": "Analysis failed",
+  "dataOrigin": {
+    "verifiedData": "Verified data",
+    "sellerProvidedData": "Seller-provided data",
+    "aiInference": "AI inference",
+    "unknown": "Unknown"
+  }
+}

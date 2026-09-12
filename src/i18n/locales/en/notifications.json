@@ -1,0 +1,25 @@
+{
+  "notifications": "Notifications",
+  "noNotifications": "No notifications",
+  "noNotificationsDescription": "You're all caught up",
+  "markAllRead": "Mark all as read",
+  "markAsRead": "Mark as read",
+  "unableToLoad": "Unable to load notifications",
+  "count_one": "{{count}} notification",
+  "count_other": "{{count}} notifications",
+  "viewAll": "View all notifications",
+  "pageTitle": "Notifications & Activity",
+  "pageDescription": "Real-time alerts for offers, diligence progress, messages, and verification updates.",
+  "types": {
+    "newMessage": "New message",
+    "newOffer": "New offer",
+    "counterOffer": "Counter offer",
+    "offerAccepted": "Offer accepted",
+    "offerRejected": "Offer rejected",
+    "documentUploaded": "Document uploaded",
+    "dueDiligenceRequest": "Due diligence request",
+    "verificationUpdate": "Verification update",
+    "dealUpdate": "Deal update",
+    "system": "System"
+  }
+}

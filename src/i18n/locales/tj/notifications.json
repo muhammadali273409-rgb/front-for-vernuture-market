@@ -1,0 +1,25 @@
+{
+  "notifications": "Огоҳиномаҳо",
+  "noNotifications": "Огоҳинома нест",
+  "noNotificationsDescription": "Шумо ҳама чизро дидаед",
+  "markAllRead": "Ҳамаро хондашуда қайд кунед",
+  "markAsRead": "Хондашуда қайд кардан",
+  "unableToLoad": "Боркунии огоҳиномаҳо ғайриимкон аст",
+  "count_one": "{{count}} огоҳинома",
+  "count_other": "{{count}} огоҳинома",
+  "viewAll": "Дидани ҳамаи огоҳиномаҳо",
+  "pageTitle": "Огоҳиномаҳо ва фаъолият",
+  "pageDescription": "Огоҳиномаҳои воқеӣ дар бораи пешниҳодҳо, пешрафти санҷиш, паёмҳо ва навсозиҳои тасдиқ.",
+  "types": {
+    "newMessage": "Паёми нав",
+    "newOffer": "Пешниҳоди нав",
+    "counterOffer": "Пешниҳоди муқобил",
+    "offerAccepted": "Пешниҳод қабул карда шуд",
+    "offerRejected": "Пешниҳод рад карда шуд",
+    "documentUploaded": "Ҳуҷҷат бор карда шуд",
+    "dueDiligenceRequest": "Дархости санҷиши ҳамаҷониба",
+    "verificationUpdate": "Навсозии тасдиқ",
+    "dealUpdate": "Навсозии муомила",
+    "system": "Система"
+  }
+}

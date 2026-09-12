@@ -1,0 +1,55 @@
+{
+  "settings": "Танзимот",
+  "profile": "Профил",
+  "security": "Амният",
+  "notifications": "Огоҳиномаҳо",
+  "language": "Забон",
+  "appearance": "Намуди зоҳирӣ",
+  "theme": "Мавзӯъ",
+  "light": "Равшан",
+  "dark": "Торик",
+  "system": "Системавӣ",
+  "sessions": "Ҷаласаҳо",
+  "changePassword": "Иваз кардани парол",
+  "saveChanges": "Захираи тағйирот",
+  "currentPassword": "Пароли ҷорӣ",
+  "newPassword": "Пароли нав",
+  "toastProfileUpdated": "Танзимоти профил бомуваффақият навсозӣ шуд",
+  "toastPasswordChanged": "Парол бомуваффақият иваз шуд",
+  "toastPreferencesSaved": "Танзимот захира шуд",
+  "demoBio": "Оператори сармояи хусусӣ ва роҳбари фонди ҷустуҷӯ.",
+  "page": {
+    "title": "Танзимоти ҳисоб ва платформа",
+    "description": "Профил, амнияти дуфакторӣ, интегратсияҳои пардохти пайвастшуда ва танзимоти минтақавии худро идора кунед."
+  },
+  "tabs": {
+    "profile": "Профил",
+    "security": "Амният ва 2FA",
+    "integrations": "Ҳисобҳои пайвастшуда",
+    "preferences": "Минтақа ва огоҳиномаҳо"
+  },
+  "profileTab": {
+    "identityTitle": "Ҳувияти умумӣ ва утоқи муомила",
+    "identityDescription": "Маълумоти тасдиқшудаи шумо, ки ба тарафҳои муқобил дар утоқҳои муомила намоён аст",
+    "companyEntity": "Ширкат / ташкилот",
+    "professionalBio": "Тарҷумаи ҳоли касбӣ"
+  },
+  "securityTab": {
+    "twoFactorTitle": "Тасдиқи дуфакторӣ (2FA)",
+    "twoFactorDescription": "Барои дастрасии ҳуҷҷатҳои утоқи муомила TOTP-и сахтафзор / барномаи тасдиқкунандаро ҳатмӣ кунед",
+    "activeFido2": "Фаъол (FIDO2)",
+    "watermarkTitle": "Тамғаи обӣ",
+    "watermarkDescription": "Ба таври худкор дар боркуниҳои махфӣ номи ташкилот ва вақти шуморо мегузорад"
+  },
+  "integrationsTab": {
+    "stripeTitle": "Stripe Connect API",
+    "stripeDescription": "Барои санҷиши худкори даромад дар давоми 24 моҳи охир пайваст шудааст",
+    "analyticsTitle": "Google Analytics 4 / Plausible",
+    "analyticsDescription": "Барои муқоисаи трафики корбарони фаъол пайваст шудааст",
+    "connected": "Пайвастшуда"
+  },
+  "preferencesTab": {
+    "platformLanguage": "Забони платформа",
+    "displayCurrency": "Асъори намоиш"
+  }
+}

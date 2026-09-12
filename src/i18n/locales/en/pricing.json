@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "title": "Pricing",
+    "description": "Plans for buyers and sellers on VentureMarket."
+  },
+  "hero": {
+    "eyebrow": "Pricing",
+    "title": "Choose your VentureMarket plan",
+    "subtitle": "Start free. Upgrade when you need deeper analysis or more visibility.",
+    "roleLabel": "I'm shopping as",
+    "roleBuyer": "Buyer",
+    "roleSeller": "Seller"
+  },
+  "badges": {
+    "mostPopular": "Most popular",
+    "recommendedForBuyers": "Recommended for you",
+    "recommendedForSellers": "Recommended for you",
+    "selected": "Selected",
+    "currentPlan": "Current plan"
+  },
+  "plans": {
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "/ month",
+      "description": "Browse the marketplace and message sellers.",
+      "features": ["Unlimited marketplace browsing", "Watchlist & saved searches", "Direct messaging"],
+      "cta": "Start Free"
+    },
+    "buyerPro": {
+      "name": "Buyer Pro",
+      "price": "$49",
+      "period": "/ month",
+      "description": "For active buyers running due diligence on multiple deals.",
+      "features": ["Everything in Free", "AI business analysis", "Priority offer notifications"],
+      "cta": "Choose Buyer Pro"
+    },
+    "sellerPro": {
+      "name": "Seller Pro",
+      "price": "$79",
+      "period": "/ month",
+      "description": "For sellers who want maximum visibility and verification.",
+      "features": ["Featured listing placement", "Full verification suite", "Advanced buyer insights"],
+      "cta": "Choose Seller Pro"
+    },
+    "business": {
+      "name": "Business",
+      "price": "Contact us",
+      "period": "",
+      "description": "For funds and firms acquiring multiple businesses.",
+      "features": ["Team seats & organizations", "Dedicated support", "Custom deal workflows"],
+      "cta": "Contact Sales"
+    }
+  },
+  "actions": {
+    "upgradeTo": "Upgrade to {{plan}}",
+    "switchTo": "Switch to {{plan}}",
+    "downgradeToFree": "Downgrade to Free",
+    "currentPlan": "Current plan",
+    "manageSubscription": "Manage subscription"
+  },
+  "freeConfirm": {
+    "title": "Free plan selected",
+    "description": "You're all set on the Free plan — no card required, ever.",
+    "cta": "Go to Dashboard"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "back": "Back",
+    "step": "Step {{current}} of {{total}}",
+    "steps": {
+      "payment": "Payment method",
+      "review": "Review"
+    },
+    "paymentMethod": "Payment method",
+    "card": "Card",
+    "cardNumber": "Card number",
+    "cardNumberPlaceholder": "4242 4242 4242 4242",
+    "expiry": "Expiry",
+    "expiryPlaceholder": "MM / YY",
+    "cvc": "CVC",
+    "cvcPlaceholder": "•••",
+    "nameOnCard": "Name on card",
+    "nameOnCardPlaceholder": "John Doe",
+    "continueToReview": "Continue to review",
+    "billingSummary": "Billing summary",
+    "plan": "Plan",
+    "billing": "Billing",
+    "monthly": "Monthly",
+    "price": "Price",
+    "total": "Total",
+    "perMonth": "/ month",
+    "confirmAndSubscribe": "Confirm & Subscribe",
+    "processing": "Processing payment...",
+    "trustTitle": "Secure checkout",
+    "trustDescription": "Your payment details are encrypted in transit and never stored on our servers.",
+    "validation": {
+      "cardNumberInvalid": "Enter a valid card number.",
+      "expiryInvalid": "Enter a valid, unexpired date.",
+      "cvcInvalid": "Enter a valid security code.",
+      "nameRequired": "Enter the name on the card."
+    },
+    "success": {
+      "title": "You're all set",
+      "description": "{{plan}} is now active.",
+      "accessTitle": "You now have access to",
+      "cta": "Go to Dashboard"
+    },
+    "failure": {
+      "title": "Payment couldn't be completed",
+      "description": "Your card wasn't charged. Please check your payment details and try again.",
+      "tryAgain": "Try again",
+      "changeMethod": "Change payment method"
+    }
+  },
+  "cancelDialog": {
+    "title": "Cancel subscription?",
+    "description": "You'll keep {{plan}} access until {{date}}. After that, your account moves to the Free plan.",
+    "keep": "Keep subscription",
+    "confirm": "Cancel subscription",
+    "cancelling": "Cancelling...",
+    "toastCancelled": "Your subscription will end on {{date}}.",
+    "pendingNotice": "Your plan is set to cancel on {{date}}.",
+    "resume": "Resume subscription",
+    "toastResumed": "Your subscription has been resumed."
+  },
+  "downgradeDialog": {
+    "title": "Downgrade to Free?",
+    "description": "You'll lose access to {{plan}} features at the end of your current billing period, {{date}}.",
+    "cancel": "Keep current plan",
+    "confirm": "Downgrade to Free"
+  },
+  "contactSales": {
+    "title": "Contact Sales",
+    "description": "Tell us about your team and we'll follow up shortly.",
+    "name": "Full name",
+    "email": "Work email",
+    "company": "Company",
+    "message": "What are you looking for?",
+    "messagePlaceholder": "Tell us about your team size and acquisition goals...",
+    "submit": "Send inquiry",
+    "sending": "Sending...",
+    "successTitle": "Thanks — we'll be in touch",
+    "successDescription": "Our team will reach out within one business day.",
+    "close": "Close",
+    "validation": {
+      "nameRequired": "Enter your full name.",
+      "emailInvalid": "Enter a valid work email.",
+      "companyRequired": "Enter your company name.",
+      "messageRequired": "Tell us a bit about what you need."
+    }
+  },
+  "comparison": {
+    "title": "Compare plans",
+    "subtitle": "A closer look at what each plan includes.",
+    "feature": "Feature",
+    "rows": {
+      "browsing": "Marketplace browsing",
+      "watchlist": "Watchlist",
+      "messaging": "Messaging",
+      "aiAnalysis": "AI analysis",
+      "priorityNotifications": "Priority notifications",
+      "featuredListing": "Featured listing",
+      "verificationSuite": "Verification suite",
+      "buyerInsights": "Advanced buyer insights",
+      "teamSeats": "Team seats"
+    }
+  },
+  "faq": {
+    "title": "Pricing FAQ",
+    "items": [
+      { "q": "Can I start for free?", "a": "Yes. The Free plan gives you unlimited marketplace browsing, a watchlist, and direct messaging — no card required, ever." },
+      { "q": "Can I change plans later?", "a": "Yes. You can upgrade, downgrade, or switch between Buyer Pro and Seller Pro at any time from this page." },
+      { "q": "When am I charged?", "a": "Paid plans are billed monthly, starting the moment your subscription is confirmed at checkout." },
+      { "q": "Can I cancel?", "a": "Yes, any time. You keep access to your paid features until the end of the billing period you already paid for." },
+      { "q": "What payment methods are supported?", "a": "Visa, Mastercard, and American Express cards are supported at checkout." },
+      { "q": "What happens to my data if I downgrade?", "a": "Nothing is deleted. Your listings, watchlist, messages, and history stay intact — you simply lose access to plan-specific features like AI analysis or featured placement." }
+    ]
+  },
+  "toasts": {
+    "planActivated": "{{plan}} is now active."
+  }
+}

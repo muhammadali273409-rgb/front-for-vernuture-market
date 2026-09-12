@@ -1,0 +1,14 @@
+{
+  "metaTitle": "About",
+  "metaDescription": "VentureMarket connects buyers and sellers of real, revenue-generating businesses.",
+  "title": "About VentureMarket",
+  "intro": "VentureMarket is a marketplace built for people who are serious about buying and selling startups — not a classifieds board. We built the tooling we wished existed when acquiring our own first business: real financial data, verified sellers, and a deal room that carries a transaction from first message to closed transfer.",
+  "values": {
+    "discoveryTitle": "Discovery, not noise",
+    "discoveryDescription": "Every listing goes through a structured review flow before it's published, so buyers spend time evaluating real opportunities.",
+    "verificationTitle": "Verification that matters",
+    "verificationDescription": "Identity, ownership, revenue, and traffic checks are built into the platform, not bolted on after the fact.",
+    "workspaceTitle": "A workspace for the whole deal",
+    "workspaceDescription": "Messaging, offers, due diligence, documents, and the deal room live in one place so nothing falls through email threads."
+  }
+}

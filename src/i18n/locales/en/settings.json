@@ -1,0 +1,55 @@
+{
+  "settings": "Settings",
+  "profile": "Profile",
+  "security": "Security",
+  "notifications": "Notifications",
+  "language": "Language",
+  "appearance": "Appearance",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "sessions": "Sessions",
+  "changePassword": "Change password",
+  "saveChanges": "Save changes",
+  "currentPassword": "Current password",
+  "newPassword": "New password",
+  "toastProfileUpdated": "Profile preferences updated successfully",
+  "toastPasswordChanged": "Password changed successfully",
+  "toastPreferencesSaved": "Preferences saved",
+  "demoBio": "Private equity operator & search fund principal.",
+  "page": {
+    "title": "Account & Platform Settings",
+    "description": "Manage your profile, 2FA security, connected payment integrations, and regional preferences."
+  },
+  "tabs": {
+    "profile": "Profile",
+    "security": "Security & 2FA",
+    "integrations": "Connected Accounts",
+    "preferences": "Regional & Alerts"
+  },
+  "profileTab": {
+    "identityTitle": "Public & Deal Room Identity",
+    "identityDescription": "Your verified credentials shown to counterparties in deal rooms",
+    "companyEntity": "Company / Entity",
+    "professionalBio": "Professional Bio"
+  },
+  "securityTab": {
+    "twoFactorTitle": "Two-Factor Authentication (2FA)",
+    "twoFactorDescription": "Enforce hardware TOTP / Authenticator app for deal room document access",
+    "activeFido2": "Active (FIDO2)",
+    "watermarkTitle": "Watermark Signature",
+    "watermarkDescription": "Automatically stamp your legal entity and timestamp on confidential downloads"
+  },
+  "integrationsTab": {
+    "stripeTitle": "Stripe Connect API",
+    "stripeDescription": "Connected for automated 24-month revenue verification audits",
+    "analyticsTitle": "Google Analytics 4 / Plausible",
+    "analyticsDescription": "Connected for active user traffic reconciliation",
+    "connected": "Connected"
+  },
+  "preferencesTab": {
+    "platformLanguage": "Platform Language",
+    "displayCurrency": "Display Currency"
+  }
+}

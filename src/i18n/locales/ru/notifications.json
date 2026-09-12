@@ -1,0 +1,27 @@
+{
+  "notifications": "Уведомления",
+  "noNotifications": "Нет уведомлений",
+  "noNotificationsDescription": "У вас нет новых уведомлений",
+  "markAllRead": "Отметить все как прочитанные",
+  "markAsRead": "Отметить как прочитанное",
+  "unableToLoad": "Не удалось загрузить уведомления",
+  "count_one": "{{count}} уведомление",
+  "count_few": "{{count}} уведомления",
+  "count_many": "{{count}} уведомлений",
+  "count_other": "{{count}} уведомления",
+  "viewAll": "Смотреть все уведомления",
+  "pageTitle": "Уведомления и активность",
+  "pageDescription": "Уведомления в реальном времени о предложениях, ходе проверки, сообщениях и обновлениях верификации.",
+  "types": {
+    "newMessage": "Новое сообщение",
+    "newOffer": "Новое предложение",
+    "counterOffer": "Встречное предложение",
+    "offerAccepted": "Предложение принято",
+    "offerRejected": "Предложение отклонено",
+    "documentUploaded": "Документ загружен",
+    "dueDiligenceRequest": "Запрос комплексной проверки",
+    "verificationUpdate": "Обновление верификации",
+    "dealUpdate": "Обновление сделки",
+    "system": "Система"
+  }
+}

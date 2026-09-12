@@ -1,0 +1,178 @@
+// VentureMarket chat/call service — owns the entire real-time communication
+// domain. Deliberately separate from the main VentureMarket backend (which
+// owns users/businesses/offers/deals): this service treats userId/dealId/
+// businessId as opaque foreign references, verified against the main
+// backend at request time (see src/lib/authBridge.ts and
+// src/lib/dealAuthorization.ts) rather than joined in the database.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Local cache of the minimal profile fields needed to render a message
+/// sender/participant without round-tripping to the main backend on every
+/// read. Refreshed whenever the auth bridge resolves that user.
+model UserCache {
+  id        String   @id
+  email     String
+  firstName String?
+  lastName  String?
+  avatarUrl String?
+  role      String?
+  updatedAt DateTime @updatedAt
+}
+
+model Conversation {
+  id         String   @id @default(cuid())
+  businessId String?
+  dealId     String?
+  title      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+  calls        Call[]
+
+  @@index([dealId])
+  @@index([businessId])
+}
+
+model ConversationParticipant {
+  id             String    @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  VOICE
+  OFFER
+  SYSTEM
+  CALL
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String?
+  type           MessageType @default(TEXT)
+  body           String?
+  replyToId      String?
+  replyTo        Message?    @relation("Replies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies        Message[]   @relation("Replies")
+  /// Structured payload for OFFER/SYSTEM/CALL messages (e.g. { offerId, amount, currency, event }).
+  metadata       String?
+  editedAt       DateTime?
+  deletedAt      DateTime?
+  pinnedAt       DateTime?
+  createdAt      DateTime    @default(now())
+
+  attachments MessageAttachment[]
+  reactions   MessageReaction[]
+  reads       MessageRead[]
+
+  @@index([conversationId, createdAt])
+}
+
+model MessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  fileName  String
+  fileType  String
+  fileSize  Int
+  /// Relative path served via GET /attachments/:id (never a public static path).
+  storedAs  String
+  kind      String
+  duration  Int?
+  createdAt DateTime @default(now())
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId, emoji])
+}
+
+model MessageRead {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  readAt    DateTime @default(now())
+
+  @@unique([messageId, userId])
+}
+
+enum CallType {
+  VOICE
+  VIDEO
+}
+
+enum CallStatus {
+  RINGING
+  CONNECTED
+  MISSED
+  REJECTED
+  ENDED
+}
+
+model Call {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  type           CallType
+  status         CallStatus   @default(RINGING)
+  initiatorId    String
+  startedAt      DateTime     @default(now())
+  connectedAt    DateTime?
+  endedAt        DateTime?
+
+  participants CallParticipant[]
+
+  @@index([conversationId])
+}
+
+model CallParticipant {
+  id       String    @id @default(cuid())
+  callId   String
+  call     Call      @relation(fields: [callId], references: [id], onDelete: Cascade)
+  userId   String
+  joinedAt DateTime?
+  leftAt   DateTime?
+
+  @@unique([callId, userId])
+}
+
+model ChatNotification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  metadata  String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+}

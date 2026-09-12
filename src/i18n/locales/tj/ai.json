@@ -1,0 +1,18 @@
+{
+  "aiAnalysis": "Таҳлили AI",
+  "analyzeBusiness": "Таҳлили бизнес",
+  "financialAnalysis": "Таҳлили молиявӣ",
+  "growthAnalysis": "Таҳлили рушд",
+  "riskAnalysis": "Таҳлили хатар",
+  "valuationEstimate": "Арзёбии арзиш",
+  "aiInsights": "Дидгоҳҳои AI",
+  "analysisInProgress": "Таҳлил идома дорад",
+  "analysisCompleted": "Таҳлил анҷом ёфт",
+  "analysisFailed": "Таҳлил ноком шуд",
+  "dataOrigin": {
+    "verifiedData": "Маълумоти тасдиқшуда",
+    "sellerProvidedData": "Маълумоти фурӯшанда",
+    "aiInference": "Хулосаи AI",
+    "unknown": "Номаълум"
+  }
+}

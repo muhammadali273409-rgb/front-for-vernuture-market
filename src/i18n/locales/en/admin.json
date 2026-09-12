@@ -1,0 +1,91 @@
+{
+  "admin": "Admin",
+  "adminPanel": "Admin Panel",
+  "exitToApp": "Exit to app",
+  "overview": "Overview",
+  "dashboard": "Dashboard",
+  "users": "Users",
+  "businesses": "Businesses",
+  "listings": "Listings",
+  "verification": "Verification",
+  "reports": "Reports",
+  "auditLogs": "Audit logs",
+  "review": "Review",
+  "approve": "Approve",
+  "reject": "Reject",
+  "suspend": "Suspend",
+  "restore": "Restore",
+  "delete": "Delete",
+  "unableToLoad": "Unable to load admin data",
+  "toastApproved": "Approved successfully",
+  "toastRejected": "Rejected successfully",
+  "toastSuspended": "Suspended successfully",
+  "toastRestored": "Restored successfully",
+  "login": {
+    "title": "VentureMarket Admin",
+    "subtitle": "Sign in with your administrator account",
+    "signingIn": "Signing in…",
+    "accessDenied": "This account does not have admin access.",
+    "invalidCredentials": "Incorrect email or password."
+  },
+  "dashboardPage": {
+    "title": "Dashboard",
+    "description": "Platform moderation queue, verification review, and audit activity."
+  },
+  "usersPage": {
+    "title": "Users",
+    "description": "Every registered VentureMarket account."
+  },
+  "businessesPage": {
+    "title": "Businesses",
+    "description": "Review, approve, reject, or suspend business listings."
+  },
+  "verificationsPage": {
+    "title": "Verification",
+    "description": "Identity, ownership, and revenue verification requests."
+  },
+  "reportsPage": {
+    "title": "Reports & Flags",
+    "description": "Content and account reports submitted by users."
+  },
+  "auditLogsPage": {
+    "title": "Audit Log",
+    "description": "Immutable log of administrative and account actions."
+  },
+  "columns": {
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "created": "Created",
+    "lastLogin": "Last login",
+    "actions": "Actions",
+    "business": "Business",
+    "owner": "Owner",
+    "country": "Country",
+    "askingPrice": "Asking price",
+    "type": "Type",
+    "expires": "Expires",
+    "reason": "Reason",
+    "target": "Target",
+    "action": "Action",
+    "ipAddress": "IP address",
+    "date": "Date"
+  },
+  "empty": {
+    "users": "No users found",
+    "businesses": "No businesses found",
+    "verifications": "No verification requests",
+    "reports": "No reports",
+    "auditLogs": "No audit log entries"
+  },
+  "confirm": {
+    "approveTitle": "Approve this business?",
+    "approveDescription": "This publishes the listing to the public marketplace.",
+    "rejectTitle": "Reject this business?",
+    "rejectDescription": "The owner will be notified and the listing will not be published.",
+    "suspendTitle": "Suspend this business?",
+    "suspendDescription": "This immediately unpublishes the listing.",
+    "reasonLabel": "Reason (optional)",
+    "reasonPlaceholder": "Add context for this decision…"
+  }
+}

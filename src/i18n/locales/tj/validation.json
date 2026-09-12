@@ -1,0 +1,16 @@
+{
+  "emailRequired": "Почтаи электронӣ ҳатмист",
+  "invalidEmail": "Суроғаи почтаи электронии дурустро ворид кунед",
+  "passwordRequired": "Парол ҳатмист",
+  "passwordMinLength": "Парол бояд ҳадди ақал 10 аломат дошта бошад",
+  "passwordTooLong": "Парол хеле дароз аст",
+  "confirmPasswordRequired": "Лутфан паролро тасдиқ кунед",
+  "passwordsDoNotMatch": "Паролҳо мувофиқат намекунанд",
+  "nameMinLength": "Ном бояд ҳадди ақал 2 аломат дошта бошад",
+  "invalidUrl": "URL-и дурустро ворид кунед",
+  "positiveAmountRequired": "Маблағи мусбатро ворид кунед",
+  "valueMustBeZeroOrGreater": "Арзиш бояд аз сифр кам набошад",
+  "periodRequired": "Давра ҳатмист",
+  "amountGreaterThanZero": "Маблағи аз сифр зиёдтарро ворид кунед",
+  "messageRequired": "Паём наметавонад холӣ бошад"
+}

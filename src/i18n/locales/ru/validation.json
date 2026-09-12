@@ -1,0 +1,16 @@
+{
+  "emailRequired": "Требуется электронная почта",
+  "invalidEmail": "Введите корректный адрес электронной почты",
+  "passwordRequired": "Требуется пароль",
+  "passwordMinLength": "Пароль должен содержать не менее 10 символов",
+  "passwordTooLong": "Пароль слишком длинный",
+  "confirmPasswordRequired": "Пожалуйста, подтвердите пароль",
+  "passwordsDoNotMatch": "Пароли не совпадают",
+  "nameMinLength": "Название должно содержать не менее 2 символов",
+  "invalidUrl": "Введите корректный URL",
+  "positiveAmountRequired": "Введите положительную сумму",
+  "valueMustBeZeroOrGreater": "Значение должно быть не меньше нуля",
+  "periodRequired": "Период обязателен",
+  "amountGreaterThanZero": "Введите сумму больше нуля",
+  "messageRequired": "Сообщение не может быть пустым"
+}

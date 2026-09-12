@@ -1,0 +1,77 @@
+{
+  "hero": {
+    "badge": "2026 Generation Private Acquisition Platform",
+    "titlePart1": "Discover. Evaluate.",
+    "titleHighlight": "Acquire.",
+    "description": "The institutional marketplace where entrepreneurs buy and sell profitable SaaS, fintech, and digital businesses with 6-layer verification, AI valuation audits, and digital deal rooms.",
+    "ctaExplore": "Explore Marketplace",
+    "ctaList": "List Your Business",
+    "ctaCompare": "Compare Assets",
+    "showcase": {
+      "name": "PulseMetrics AI (Acquisition ID: #8429)",
+      "trustScore": "98% Trust Score",
+      "subtitle": "Stripe Verified ARR · 2.9x Multiple · NDA Data Room Live",
+      "askingPriceLabel": "Asking Price",
+      "verifiedMrrLabel": "Verified MRR",
+      "verifiedMrrChange": "+34% YoY",
+      "grossMarginLabel": "Gross Margin",
+      "grossMarginNote": "Bare-metal infra",
+      "aiValuationLabel": "AI Valuation",
+      "aiValuationHealth": "9.4/10 Health",
+      "dueDiligenceLabel": "Due Diligence",
+      "dueDiligencePassed": "100% Passed",
+      "dueDiligenceNote": "6-layer audited"
+    }
+  },
+  "statsBar": {
+    "closedVolumeLabel": "Closed M&A Volume",
+    "ddAccuracyLabel": "Due Diligence Accuracy",
+    "avgTimeToLoiLabel": "Average Time to LOI",
+    "verifiedAcquirersLabel": "Verified Acquirers"
+  },
+  "lifecycle": {
+    "eyebrow": "The 2026 Standard",
+    "title": "A Complete Acquisition Operating System",
+    "description": "From initial asset discovery to funds escrow release, manage the full transaction without fragmented emails or unverified claims.",
+    "step1Title": "Discovery & Search",
+    "step1Description": "Filter vetted businesses by verified MRR, multiple multiples, growth velocity, and gross margins.",
+    "step2Title": "AI Valuation Audit",
+    "step2Description": "Instant AI financial health scoring, customer churn stress-testing, and M&A comp analysis.",
+    "step3Title": "Digital Deal Room",
+    "step3Description": "Execute mutual NDAs, negotiate structured terms with revision history, and review watermarked data room files.",
+    "step4Title": "Escrow & Asset Transfer",
+    "step4Description": "Milestone-based fund release, automated DNS & code repository escrow transfer with full legal protection."
+  },
+  "featured": {
+    "liveListings": "Live Listings",
+    "title": "Featured Verified Acquisitions",
+    "description": "Profitable, audited businesses ready for immediate diligence and negotiation",
+    "viewAll": "View all listings"
+  },
+  "trust": {
+    "badge": "Institutional Trust Protocol",
+    "title": "Zero Unverified Claims. Real Financial Proof.",
+    "description": "Traditional brokers rely on self-reported PDFs. VentureMarket connects directly to financial and infrastructure APIs to mathematically verify revenue, traffic, ownership, and code integrity.",
+    "feature1Title": "Stripe & Bank API Sync",
+    "feature1Description": "24-month gross volume, refunds, disputes, and net recurring cashflow audited via direct read-only API.",
+    "feature2Title": "Cryptographic DNS & Repo Ownership",
+    "feature2Description": "Automated registrar TXT and GitHub signature validation guarantees seller is authentic asset owner.",
+    "feature3Title": "Legal Good Standing & KYC",
+    "feature3Description": "Biometric identity verification and corporate registry filings checked prior to listing publication.",
+    "checklistTitle": "6-Layer Verification Checklist",
+    "checklistPassed": "100% Passed",
+    "verified": "VERIFIED",
+    "checklistItem1": "Founder Biometric KYC",
+    "checklistItem2": "Entity Good Standing",
+    "checklistItem3": "Stripe Revenue History",
+    "checklistItem4": "Bank Tax Reconciliation",
+    "checklistItem5": "DNS Domain Cryptography",
+    "checklistItem6": "Analytics Server Traffic"
+  },
+  "cta": {
+    "title": "Ready to Acquire or Sell Your Business?",
+    "description": "Join thousands of founders, micro-PE operators, and strategic search funds closing acquisitions on VentureMarket.",
+    "browseMarketplace": "Browse Marketplace",
+    "listAsSeller": "List as Seller"
+  }
+}

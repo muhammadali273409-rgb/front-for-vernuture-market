@@ -1,0 +1,16 @@
+{
+  "emailRequired": "Email is required",
+  "invalidEmail": "Enter a valid email address",
+  "passwordRequired": "Password is required",
+  "passwordMinLength": "Password must be at least 10 characters",
+  "passwordTooLong": "Password is too long",
+  "confirmPasswordRequired": "Please confirm your password",
+  "passwordsDoNotMatch": "Passwords don't match",
+  "nameMinLength": "Name must be at least 2 characters",
+  "invalidUrl": "Enter a valid URL",
+  "positiveAmountRequired": "Enter a positive amount",
+  "valueMustBeZeroOrGreater": "Value must be zero or greater",
+  "periodRequired": "Period is required",
+  "amountGreaterThanZero": "Enter an amount greater than zero",
+  "messageRequired": "Message can't be empty"
+}

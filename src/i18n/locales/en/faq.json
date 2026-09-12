@@ -1,0 +1,59 @@
+{
+  "metaTitle": "FAQ",
+  "metaDescription": "Answers about buying, selling, due diligence, escrow, and closing acquisitions on VentureMarket.",
+  "eyebrow": "Knowledge Base & Support",
+  "title": "Frequently Asked Questions",
+  "subtitle": "Everything you need to know about buying, selling, due diligence, and escrow transfers on VentureMarket.",
+  "stillHaveQuestionsTitle": "Still have questions?",
+  "stillHaveQuestionsDescription": "Our M&A advisory and due diligence team is available to assist your search fund or founder listing.",
+  "exploreActiveDeals": "Explore Active Deals",
+  "categories": {
+    "buyers": {
+      "title": "Buyers & Search Funds",
+      "items": {
+        "verifyData": {
+          "q": "How does VentureMarket verify financial data?",
+          "a": "We connect directly to Stripe, Braintree, and corporate banking APIs via read-only integrations to extract 24 months of gross volume, net revenue, refunds, chargebacks, and active subscription cohorts. We do not rely on self-reported spreadsheets."
+        },
+        "offerAccepted": {
+          "q": "What happens after an offer is accepted?",
+          "a": "Upon mutual acceptance of a Letter of Intent (LOI), a digital Deal Room is automatically provisioned. Both parties execute a digital mutual NDA, unlock the complete data room vault, and begin structured due diligence."
+        },
+        "escrow": {
+          "q": "Are funds held in escrow during due diligence?",
+          "a": "Yes. Purchase capital is held securely in VentureMarket Escrow Trust. Funds are only released once all closing tasks (IP assignment, DNS transfer, code escrow) are validated and signed off by the buyer."
+        }
+      }
+    },
+    "sellers": {
+      "title": "Founders & Sellers",
+      "items": {
+        "cost": {
+          "q": "How much does it cost to list a business?",
+          "a": "Creating a listing and basic verification is free. We charge a standard 4% success fee upon closed acquisition transfer, significantly lower than traditional 10-15% M&A broker fees."
+        },
+        "confidential": {
+          "q": "Can I keep sensitive metrics confidential before an NDA?",
+          "a": "Yes. VentureMarket supports anonymous listings where your company name, domain, and specific customer lists remain masked until a verified buyer executes a digital NDA with your approval."
+        },
+        "transferAssets": {
+          "q": "How do I transfer source code and cloud assets safely?",
+          "a": "Our automated escrow protocol facilitates zero-trust transfers for GitHub repositories, Cloudflare DNS, AWS/GCP IAM roles, and Stripe merchant account ownership."
+        }
+      }
+    },
+    "legal": {
+      "title": "Due Diligence & Legal",
+      "items": {
+        "aiAudit": {
+          "q": "What is included in the AI Valuation and Due Diligence Audit?",
+          "a": "Our AI engine benchmarks your financial unit economics against over 1,400 comparable closed M&A transactions, stress-tests customer churn curves, evaluates technical debt risks, and computes estimated fair market value multiples."
+        },
+        "apa": {
+          "q": "Are standard Asset Purchase Agreements (APA) provided?",
+          "a": "Yes. VentureMarket provides institutional-grade Asset Purchase Agreement (APA) templates drafted by international tech M&A legal counsels, customizable for earn-outs, escrow holdbacks, and IP transfer schedules."
+        }
+      }
+    }
+  }
+}
