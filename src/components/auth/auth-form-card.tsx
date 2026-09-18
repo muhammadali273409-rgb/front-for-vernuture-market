@@ -196,6 +196,11 @@ export function AuthFormCard({
       return;
     }
 
+    if (registerPassword.length < 10) {
+      setFormError(t("auth:validation.passwordMinLength", { count: 10 }));
+      return;
+    }
+
     if (registerPassword !== confirmPassword) {
       setFormError(t("auth:validation.passwordsDoNotMatch"));
       return;
