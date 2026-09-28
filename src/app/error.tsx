@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
 
-export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   const { t } = useTranslation("common");
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
         <h1 className="text-2xl font-semibold">{t("somethingWentWrong")}</h1>
         <p className="text-sm text-muted-foreground max-w-sm">{friendlyErrorMessage(error, t)}</p>
       </div>
-      <Button onClick={reset}>{t("tryAgain")}</Button>
+      <Button onClick={retry}>{t("tryAgain")}</Button>
     </div>
   );
 }
