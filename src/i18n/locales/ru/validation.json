@@ -2,7 +2,6 @@
   "emailRequired": "Требуется электронная почта",
   "invalidEmail": "Введите корректный адрес электронной почты",
   "passwordRequired": "Требуется пароль",
-  "passwordMinLength": "Пароль должен содержать не менее 10 символов",
   "passwordTooLong": "Пароль слишком длинный",
   "confirmPasswordRequired": "Пожалуйста, подтвердите пароль",
   "passwordsDoNotMatch": "Пароли не совпадают",

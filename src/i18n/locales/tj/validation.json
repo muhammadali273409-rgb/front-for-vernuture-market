@@ -2,7 +2,6 @@
   "emailRequired": "Почтаи электронӣ ҳатмист",
   "invalidEmail": "Суроғаи почтаи электронии дурустро ворид кунед",
   "passwordRequired": "Парол ҳатмист",
-  "passwordMinLength": "Парол бояд ҳадди ақал 10 аломат дошта бошад",
   "passwordTooLong": "Парол хеле дароз аст",
   "confirmPasswordRequired": "Лутфан паролро тасдиқ кунед",
   "passwordsDoNotMatch": "Паролҳо мувофиқат намекунанд",

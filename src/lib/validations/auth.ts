@@ -13,7 +13,7 @@ export const registerSchema = z
     email: z.string().min(1, "validation:emailRequired").email("validation:invalidEmail"),
     password: z
       .string()
-      .min(10, "validation:passwordMinLength")
+      .min(1, "validation:passwordRequired")
       .max(128, "validation:passwordTooLong"),
     confirmPassword: z.string().min(1, "validation:confirmPasswordRequired"),
     role: z.enum(["BUYER", "SELLER"]),
@@ -31,7 +31,7 @@ export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 
 export const resetPasswordSchema = z
   .object({
-    password: z.string().min(10, "validation:passwordMinLength").max(128),
+    password: z.string().min(1, "validation:passwordRequired").max(128),
     confirmPassword: z.string().min(1, "validation:confirmPasswordRequired"),
   })
   .refine((data) => data.password === data.confirmPassword, {
