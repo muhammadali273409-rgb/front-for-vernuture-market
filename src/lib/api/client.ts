@@ -1,5 +1,14 @@
-import { env } from "@/lib/config/env";
 import { ApiError, isApiErrorBody, unwrapEnvelope } from "@/lib/api/error";
+
+/**
+ * Same-origin proxy (see src/app/api/backend/[...path]/route.ts) instead of
+ * calling env.apiUrl directly from the browser. The backend lives on a
+ * different registrable domain (Render vs. this app's Railway host), so a
+ * cookie it sets can only ever be stored under its own domain — Server
+ * Components and proxy.ts's session check would never see it. Routing
+ * through here re-issues that cookie on this app's own origin instead.
+ */
+const BACKEND_PROXY_BASE = "/api/backend";
 
 export interface ApiFetchOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
@@ -11,7 +20,7 @@ let refreshInFlight: Promise<boolean> | null = null;
 
 async function refreshSession(): Promise<boolean> {
   if (!refreshInFlight) {
-    refreshInFlight = fetch(`${env.apiUrl}/auth/refresh`, {
+    refreshInFlight = fetch(`${BACKEND_PROXY_BASE}/auth/refresh`, {
       method: "POST",
       credentials: "include",
     })
@@ -47,7 +56,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
 
   const doFetch = () =>
-    fetch(`${env.apiUrl}${path}`, {
+    fetch(`${BACKEND_PROXY_BASE}${path}`, {
       ...rest,
       credentials: "include",
       headers: {
