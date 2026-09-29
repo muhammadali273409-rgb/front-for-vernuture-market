@@ -53,4 +53,6 @@ export const businessesApi = {
 
   addMetric: (id: string, input: CreateMetricInput) =>
     apiFetch<BusinessMetric>(`/businesses/${id}/metrics`, { method: "POST", body: input }),
+
+  remove: (id: string) => apiFetch<void>(`/businesses/${id}`, { method: "DELETE" }),
 };

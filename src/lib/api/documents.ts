@@ -25,5 +25,12 @@ export const documentsApi = {
 
   getDownloadUrl: (id: string) => apiFetch<{ url: string }>(`/documents/${id}/download`),
 
+  /** Swagger documents no fields for GrantAccessDto — verify against the backend source before relying on this shape. */
+  grantAccess: (id: string, granteeId: string) =>
+    apiFetch<void>(`/documents/${id}/access`, { method: "POST", body: { granteeId } }),
+
+  revokeAccess: (id: string, granteeId: string) =>
+    apiFetch<void>(`/documents/${id}/access/${granteeId}`, { method: "DELETE" }),
+
   remove: (id: string) => apiFetch<void>(`/documents/${id}`, { method: "DELETE" }),
 };

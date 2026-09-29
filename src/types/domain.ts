@@ -365,6 +365,87 @@ export interface Subscription {
   cancelAtPeriodEnd: boolean;
 }
 
+export interface Organization {
+  id: string;
+  name: string;
+  ownerId: string;
+  createdAt: string;
+}
+
+export interface OrganizationMember {
+  userId: string;
+  organizationId: string;
+  role: string;
+  user?: OfferParty;
+}
+
+export type AgreementStatus = "DRAFT" | "PENDING_SIGNATURES" | "SIGNED" | "VOID";
+
+export interface AgreementVersion {
+  id: string;
+  agreementId: string;
+  version: number;
+  content: string;
+  createdById: string;
+  createdAt: string;
+  signatures?: { userId: string; signedAt: string }[];
+}
+
+export interface Agreement {
+  id: string;
+  dealId: string;
+  title: string;
+  type: string;
+  status: AgreementStatus;
+  versions?: AgreementVersion[];
+  createdAt: string;
+}
+
+export type TransactionStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "REFUNDED";
+
+export interface Transaction {
+  id: string;
+  dealId: string;
+  amount: number;
+  currency: string;
+  status: TransactionStatus;
+  createdAt: string;
+  completedAt: string | null;
+}
+
+export interface BillingPlan {
+  code: PlanCode;
+  name: string;
+  price: number;
+  currency: string;
+  interval: "MONTH" | "YEAR";
+  features: string[];
+}
+
+export type ReportTargetType = "BUSINESS" | "USER" | "MESSAGE" | "LISTING";
+export type ReportStatus = "OPEN" | "UNDER_REVIEW" | "RESOLVED" | "REJECTED";
+
+export interface Report {
+  id: string;
+  reporterId: string;
+  targetType: ReportTargetType;
+  targetId: string;
+  businessId: string | null;
+  reason: string;
+  status: ReportStatus;
+  createdAt: string;
+}
+
+export interface VerificationSubmission {
+  id: string;
+  businessId: string;
+  type: VerificationType;
+  status: VerificationStatus;
+  submittedAt: string;
+  reviewedAt: string | null;
+  expiresAt: string | null;
+}
+
 export interface AIAnalysis {
   id: string;
   businessId: string;

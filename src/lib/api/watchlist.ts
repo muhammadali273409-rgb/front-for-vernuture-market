@@ -18,5 +18,8 @@ export const savedSearchesApi = {
   create: (input: { name: string; filters: Record<string, unknown>; alertsEnabled?: boolean }) =>
     apiFetch<SavedSearch>("/saved-searches", { method: "POST", body: input }),
 
+  update: (id: string, input: Partial<{ name: string; filters: Record<string, unknown>; alertsEnabled: boolean }>) =>
+    apiFetch<SavedSearch>(`/saved-searches/${id}`, { method: "PATCH", body: input }),
+
   remove: (id: string) => apiFetch<void>(`/saved-searches/${id}`, { method: "DELETE" }),
 };

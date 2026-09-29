@@ -4,6 +4,8 @@ import type { ApiPaginated } from "@/types/api";
 import type {
   AccountStatus,
   BusinessStatus,
+  Deal,
+  DealStatus,
   ListingStatus,
   UserRole,
   VerificationStatus,
@@ -83,6 +85,9 @@ export const adminApi = {
 
   listAuditLogs: (params: AdminCursorParams = {}) =>
     apiFetch<ApiPaginated<AdminAuditLogSummary>>(`/admin/audit-logs${buildQueryString(params)}`),
+
+  listDeals: (params: AdminCursorParams & { status?: DealStatus } = {}) =>
+    apiFetch<ApiPaginated<Deal>>(`/admin/deals${buildQueryString(params)}`),
 
   approveBusiness: (id: string, reason?: string) =>
     apiFetch(`/admin/businesses/${id}/approve`, { method: "POST", body: { reason } }),
