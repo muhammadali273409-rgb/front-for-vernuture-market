@@ -129,6 +129,21 @@ export function AuthFormCard({
 
   const isSubmitting = loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending;
 
+  /**
+   * An existing account always keeps the role stored on the backend — picking
+   * the other card never converts it. Tell the user instead of silently
+   * ignoring their pick.
+   */
+  function noteIfRoleDiffers(user: CurrentUser) {
+    if (!selectedRole || user.role === selectedRole) return;
+    if (user.role !== "BUYER" && user.role !== "SELLER") return;
+    toast.info(
+      t("auth:roleChoice.existingRoleKept", {
+        role: t(user.role === "SELLER" ? "auth:roleSeller" : "auth:roleBuyer"),
+      }),
+    );
+  }
+
   /** Signed in: drop the pre-auth choice and route by the role the backend returned. */
   function finishSignIn(user: CurrentUser) {
     clearIntendedRole();
@@ -150,6 +165,7 @@ export function AuthFormCard({
       {
         onSuccess: (result) => {
           toast.success(t("auth:loginWelcomeToast"));
+          noteIfRoleDiffers(result.user);
           finishSignIn(result.user);
         },
         onError: (error) => {
@@ -182,14 +198,7 @@ export function AuthFormCard({
             return;
           }
           toast.success(result.isNewUser ? t("auth:registerSuccess") : t("auth:loginWelcomeToast"));
-          if (!result.isNewUser && selectedRole && result.user.role !== selectedRole) {
-            // Existing account: its stored role wins, never silently converted.
-            toast.info(
-              t("auth:roleChoice.existingRoleKept", {
-                role: t(result.user.role === "SELLER" ? "auth:roleSeller" : "auth:roleBuyer"),
-              }),
-            );
-          }
+          if (!result.isNewUser) noteIfRoleDiffers(result.user);
           finishSignIn(result.user);
         },
         onError: () => {
@@ -412,6 +421,20 @@ export function AuthFormCard({
           {/* TAB 1: LOGIN FORM */}
           {activeTab === "login" ? (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
+              {/* Optional here: an existing account signs in with its stored
+                  role. The pick only matters if "Continue with Google"
+                  creates a brand-new account. */}
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-foreground">{t("auth:roleChoice.question")}</p>
+                <RoleChoiceCards
+                  variant="compact"
+                  selected={selectedRole}
+                  onSelect={selectRole}
+                  disabled={isSubmitting}
+                />
+                <p className="text-[11px] text-muted-foreground">{t("auth:roleChoice.loginHint")}</p>
+              </div>
+
               {/* Email Address */}
               <div className="relative group">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground group-focus-within:text-blue-500 transition-colors">
