@@ -8,10 +8,11 @@ import {
 } from "@/lib/api/businesses";
 import { queryKeys } from "@/lib/query/keys";
 
-export function useMyBusinesses() {
+export function useMyBusinesses({ enabled = true }: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.myBusinesses,
     queryFn: () => businessesApi.listMine(),
+    enabled,
   });
 }
 
@@ -54,21 +55,13 @@ export function useUpdateListing(id: string) {
   });
 }
 
-export function usePublishListing(id: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => businessesApi.publish(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.business(id) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.myBusinesses });
-    },
-  });
-}
+export type ListingStatusAction = "submitForReview" | "withdrawSubmission" | "unpublish" | "resume";
 
-export function useUnpublishListing(id: string) {
+/** Seller-driven listing lifecycle moves; the backend decides whether each is allowed. */
+export function useListingStatusAction(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => businessesApi.unpublish(id),
+    mutationFn: (action: ListingStatusAction) => businessesApi[action](id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.business(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.myBusinesses });

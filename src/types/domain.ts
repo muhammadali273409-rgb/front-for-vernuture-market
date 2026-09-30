@@ -293,6 +293,9 @@ export interface Deal {
   buyerId: string;
   sellerId: string;
   status: DealStatus;
+  /** Set when the seller confirms the business was handed over (TRANSFER stage). */
+  sellerTransferConfirmedAt?: string | null;
+  buyerReceiptConfirmedAt?: string | null;
   participants: DealParticipant[];
   tasks?: DealTask[];
   timelineEvents?: DealTimelineEvent[];

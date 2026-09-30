@@ -98,5 +98,20 @@
   "noTasksDescription": "Closing tasks will show up here once they're added to this deal.",
   "noTimelineTitle": "No activity yet",
   "noTimelineDescription": "Milestones and status changes for this deal will appear here.",
-  "backToDealRooms": "Back to all deal rooms"
+  "backToDealRooms": "Back to all deal rooms",
+  "actions": {
+    "startNda": "Start NDA",
+    "signNda": "Sign NDA",
+    "waitingForNda": "You signed the NDA. Waiting for the other party.",
+    "closeDueDiligence": "Close due diligence",
+    "sellerDueDiligence": "Respond to the buyer's due diligence requests. The buyer closes this stage.",
+    "waitingForAgreement": "Both parties must sign the latest agreement version to move to payment.",
+    "waitingForPayment": "Waiting for the payment provider to confirm payment.",
+    "confirmTransfer": "Confirm business transfer",
+    "waitingForReceipt": "Transfer confirmed. Waiting for the buyer to confirm receipt.",
+    "confirmReceipt": "Confirm receipt & complete deal",
+    "waitingForTransfer": "Waiting for the seller to confirm the transfer.",
+    "disputed": "This deal is disputed. An administrator will resolve it.",
+    "cancelDeal": "Cancel deal"
+  }
 }

@@ -19,6 +19,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate, formatDateTime } from "@/lib/utils/format";
 import { useDueDiligence, useUpdateTaskStatus } from "@/hooks/use-deals";
 import { useBusinessDocuments } from "@/hooks/use-documents";
+import { DealStageActions } from "@/components/deals/deal-stage-actions";
 import {
   dealStatusKey,
   dealTaskStatusKey,
@@ -117,6 +118,8 @@ export function DealRoomView({ deal }: { deal: Deal }) {
             );
           })}
         </div>
+
+        <DealStageActions deal={deal} />
       </Card>
 
       {/* Main Tabs Workspace */}

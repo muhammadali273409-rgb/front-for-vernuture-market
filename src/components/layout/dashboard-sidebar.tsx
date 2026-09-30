@@ -7,7 +7,7 @@ import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useUiStore } from "@/stores/ui-store";
-import { dashboardNav } from "@/config/nav";
+import { dashboardNavFor } from "@/config/nav";
 import { useTranslation } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/types/domain";
@@ -72,7 +72,7 @@ export function DashboardSidebar({ user }: { user: CurrentUser }) {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {dashboardNav.map((item) => (
+        {dashboardNavFor(user.role).map((item) => (
           <NavLink
             key={item.href}
             href={item.href}

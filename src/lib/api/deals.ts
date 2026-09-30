@@ -16,6 +16,15 @@ export const dealsApi = {
   updateStatus: (id: string, status: string) =>
     apiFetch<Deal>(`/deals/${id}/status`, { method: "PATCH", body: { status } }),
 
+  /** Buyer/seller signs the deal NDA; due diligence opens once both have. */
+  signNda: (id: string) => apiFetch<Deal>(`/deals/${id}/nda/sign`, { method: "POST" }),
+
+  /** Seller: the business has been handed over. */
+  confirmTransfer: (id: string) => apiFetch<Deal>(`/deals/${id}/confirm-transfer`, { method: "POST" }),
+
+  /** Buyer: the business was received — completes the deal. */
+  confirmReceipt: (id: string) => apiFetch<Deal>(`/deals/${id}/confirm-receipt`, { method: "POST" }),
+
   addParticipant: (id: string, input: AddParticipantInput) =>
     apiFetch<Deal>(`/deals/${id}/participants`, { method: "POST", body: input }),
 

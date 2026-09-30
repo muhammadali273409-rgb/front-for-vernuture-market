@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ListingCard } from "@/components/marketplace/listing-card";
+import { RoleChoiceSection } from "@/components/onboarding/role-choice-section";
 import { listingsApi } from "@/lib/api/listings";
 import { publicApiFetch } from "@/lib/api/public";
 import { formatCompactMoney } from "@/lib/utils/format";
@@ -61,16 +62,16 @@ export default async function HomePage() {
             <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">{t("hero.description")}</p>
           </div>
 
-          {/* CTAs */}
+          {/* Onboarding decision: Buyer or Seller (signed-in users go straight to their workspace) */}
+          <RoleChoiceSection />
+
+          {/* Secondary CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="h-11 px-6 text-sm font-semibold shadow-xs">
+            <Button asChild size="lg" variant="ghost" className="h-11 px-4 text-sm font-medium text-muted-foreground">
               <Link href="/marketplace">
                 {t("hero.ctaExplore")}
                 <ArrowRight className="size-4" />
               </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="h-11 px-6 text-sm font-semibold border-border">
-              <Link href="/dashboard/businesses/new">{t("hero.ctaList")}</Link>
             </Button>
             <Button asChild size="lg" variant="ghost" className="h-11 px-4 text-sm font-medium text-muted-foreground">
               <Link href="/marketplace/compare">

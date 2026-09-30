@@ -40,7 +40,23 @@ export function useUpdateDealStatus(dealId: string) {
       queryClient.invalidateQueries({ queryKey: queryKeys.deals });
       toast.success(t("toastStatusUpdated"));
     },
-    onError: (error) => toast.error(friendlyErrorMessage(error, t)),
+    onError: (error) => toast.error(friendlyErrorMessage(error, t, { showValidationDetail: true })),
+  });
+}
+
+export type DealAction = "signNda" | "confirmTransfer" | "confirmReceipt";
+
+export function useDealAction(dealId: string) {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation(["deals", "errors"]);
+  return useMutation({
+    mutationFn: (action: DealAction) => dealsApi[action](dealId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.deal(dealId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.deals });
+      toast.success(t("toastStatusUpdated"));
+    },
+    onError: (error) => toast.error(friendlyErrorMessage(error, t, { showValidationDetail: true })),
   });
 }
 

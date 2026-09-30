@@ -66,7 +66,18 @@
     "countryCodePlaceholder": "US",
     "countryCodeHint": "2-letter ISO code, e.g. US, GB.",
     "websitePlaceholder": "https://example.com",
-    "creatingEllipsis": "Creating…"
+    "creatingEllipsis": "Creating…",
+    "submittingEllipsis": "Submitting…",
+    "toastSubmittedForReview": "Submitted for review. An admin will check your listing before it goes live.",
+    "pendingReviewNotice": "Your listing is waiting for admin review. It can't be edited until it's approved, rejected, or you withdraw it.",
+    "withdrawSubmission": "Withdraw from review",
+    "toastSubmissionWithdrawn": "Submission withdrawn — the listing is a draft again",
+    "rejectedNotice": "This listing was rejected. Fix the issues from the reviewer's note and submit it again.",
+    "resumeListing": "Resume listing",
+    "resumingEllipsis": "Resuming…",
+    "toastListingResumed": "Listing is live again",
+    "pausedNotice": "Paused listings are hidden from buyers. A listing can't be resumed while a deal on it is in progress.",
+    "lockedNotice": "This business is locked and can't be edited in its current status."
   },
   "aiAnalysis": {
     "engineTitle": "AI Acquisition Due Diligence Engine",

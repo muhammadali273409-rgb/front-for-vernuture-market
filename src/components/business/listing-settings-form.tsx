@@ -12,18 +12,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useUpdateListing, usePublishListing, useUnpublishListing } from "@/hooks/use-businesses";
+import { useUpdateListing, useListingStatusAction, type ListingStatusAction } from "@/hooks/use-businesses";
 import { listingDetailsSchema, type ListingDetailsValues } from "@/lib/validations/business";
 import { toast } from "sonner";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
 import type { OwnedBusiness } from "@/types/domain";
 
+const LOCKED_STATUSES: OwnedBusiness["status"][] = ["PENDING_REVIEW", "SOLD", "SUSPENDED", "ARCHIVED"];
+
 export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
   const { t } = useTranslation(["business", "errors"]);
   const updateListing = useUpdateListing(business.id);
-  const publish = usePublishListing(business.id);
-  const unpublish = useUnpublishListing(business.id);
+  const statusAction = useListingStatusAction(business.id);
 
   const form = useForm<ListingDetailsValues>({
     resolver: zodResolver(listingDetailsSchema),
@@ -44,7 +45,17 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
     );
   }
 
-  const isPublished = business.status === "PUBLISHED";
+  // Mirrors the backend's edit lock; the backend still rejects edits on its own.
+  const isLocked = LOCKED_STATUSES.includes(business.status);
+
+  function runAction(action: ListingStatusAction, successKey: string) {
+    statusAction.mutate(action, {
+      onSuccess: () => toast.success(t(successKey)),
+      onError: (e) => toast.error(friendlyErrorMessage(e, t, { showValidationDetail: true })),
+    });
+  }
+
+  const pending = statusAction.isPending;
 
   return (
     <div className="space-y-6">
@@ -100,36 +111,57 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
               )}
             />
           </div>
-          <Button type="submit" disabled={updateListing.isPending}>
+          <Button type="submit" disabled={updateListing.isPending || isLocked}>
             {updateListing.isPending ? t("common:saving") : t("business:seller.saveListingDetails")}
           </Button>
         </form>
       </Form>
 
-      <div className="flex items-center gap-3 border-t pt-4">
-        {isPublished ? (
+      <div className="flex flex-wrap items-center gap-3 border-t pt-4">
+        {(business.status === "DRAFT" || business.status === "REJECTED") && (
+          <>
+            <Button onClick={() => runAction("submitForReview", "business:seller.toastSubmittedForReview")} disabled={pending}>
+              {pending ? t("business:seller.submittingEllipsis") : t("business:seller.submitForReview")}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              {business.status === "REJECTED"
+                ? t("business:seller.rejectedNotice")
+                : t("business:seller.publishRequirements")}
+            </p>
+          </>
+        )}
+        {business.status === "PENDING_REVIEW" && (
+          <>
+            <Button
+              variant="outline"
+              onClick={() => runAction("withdrawSubmission", "business:seller.toastSubmissionWithdrawn")}
+              disabled={pending}
+            >
+              {t("business:seller.withdrawSubmission")}
+            </Button>
+            <p className="text-xs text-muted-foreground">{t("business:seller.pendingReviewNotice")}</p>
+          </>
+        )}
+        {business.status === "PUBLISHED" && (
           <Button
             variant="outline"
-            onClick={() => unpublish.mutate(undefined, {
-              onSuccess: () => toast.success(t("business:seller.toastListingUnpublished")),
-              onError: (e) => toast.error(friendlyErrorMessage(e, t)),
-            })}
-            disabled={unpublish.isPending}
+            onClick={() => runAction("unpublish", "business:seller.toastListingUnpublished")}
+            disabled={pending}
           >
-            {unpublish.isPending ? t("business:seller.pausing") : t("business:seller.unpublishListing")}
-          </Button>
-        ) : (
-          <Button
-            onClick={() => publish.mutate(undefined, {
-              onSuccess: () => toast.success(t("business:seller.toastListingPublished")),
-              onError: (e) => toast.error(friendlyErrorMessage(e, t)),
-            })}
-            disabled={publish.isPending}
-          >
-            {publish.isPending ? t("business:seller.publishingEllipsis") : t("business:seller.publishListing")}
+            {pending ? t("business:seller.pausing") : t("business:seller.unpublishListing")}
           </Button>
         )}
-        <p className="text-xs text-muted-foreground">{t("business:seller.publishRequirements")}</p>
+        {business.status === "PAUSED" && (
+          <>
+            <Button onClick={() => runAction("resume", "business:seller.toastListingResumed")} disabled={pending}>
+              {pending ? t("business:seller.resumingEllipsis") : t("business:seller.resumeListing")}
+            </Button>
+            <p className="text-xs text-muted-foreground">{t("business:seller.pausedNotice")}</p>
+          </>
+        )}
+        {isLocked && business.status !== "PENDING_REVIEW" && (
+          <p className="text-xs text-muted-foreground">{t("business:seller.lockedNotice")}</p>
+        )}
       </div>
     </div>
   );

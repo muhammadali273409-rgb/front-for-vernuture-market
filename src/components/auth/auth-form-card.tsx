@@ -20,9 +20,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLogin, useRegister, useGoogleLogin } from "@/hooks/use-auth-mutations";
-import { ApiError } from "@/lib/api/error";
+import { ApiError, friendlyErrorMessage } from "@/lib/api/error";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { GoogleRoleSelectDialog } from "@/components/auth/google-role-select-dialog";
+import { RoleChoiceCards } from "@/components/onboarding/role-choice-cards";
+import {
+  clearIntendedRole,
+  parsePublicRole,
+  rememberIntendedRole,
+  useIntendedRole,
+  type PublicRole,
+} from "@/lib/auth/intended-role";
+import { homePathForRole } from "@/lib/auth/roles";
+import type { CurrentUser } from "@/types/domain";
 import { useTranslation } from "@/i18n/client";
 import type { TFunction } from "i18next";
 import { toast } from "sonner";
@@ -75,7 +85,8 @@ export function AuthFormCard({
 }: AuthFormCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextUrl = searchParams.get("next") || "/dashboard";
+  // Explicit ?next= wins; otherwise each user lands in their own role's home.
+  const nextParam = searchParams.get("next");
 
   const [activeTab, setActiveTab] = React.useState<"login" | "register">(initialTab);
   const [showPassword, setShowPassword] = React.useState(false);
@@ -88,6 +99,19 @@ export function AuthFormCard({
   // a Buyer/Seller choice. Never persisted (not state, not storage) — it's
   // resubmitted once, then discarded whether the user continues or cancels.
   const [pendingGoogleCredential, setPendingGoogleCredential] = React.useState<string | null>(null);
+
+  // Buyer/Seller picked on the landing page (?role=) or earlier in this tab.
+  // Only used to create a *new* account — an existing account always keeps
+  // the role stored on the backend.
+  const rememberedRole = useIntendedRole();
+  const [pickedRole, setPickedRole] = React.useState<PublicRole | null>(null);
+  const selectedRole = pickedRole ?? parsePublicRole(searchParams.get("role")) ?? rememberedRole;
+
+  function selectRole(role: PublicRole) {
+    setPickedRole(role);
+    rememberIntendedRole(role);
+    setFormError(null);
+  }
 
   // Form Fields
   const [loginEmail, setLoginEmail] = React.useState("");
@@ -105,6 +129,13 @@ export function AuthFormCard({
 
   const isSubmitting = loginMutation.isPending || registerMutation.isPending || googleLoginMutation.isPending;
 
+  /** Signed in: drop the pre-auth choice and route by the role the backend returned. */
+  function finishSignIn(user: CurrentUser) {
+    clearIntendedRole();
+    if (onSuccess) onSuccess();
+    else router.push(nextParam || homePathForRole(user.role));
+  }
+
   function handleLoginSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
@@ -117,10 +148,9 @@ export function AuthFormCard({
     loginMutation.mutate(
       { email: loginEmail, password: loginPassword },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
           toast.success(t("auth:loginWelcomeToast"));
-          if (onSuccess) onSuccess();
-          else router.push(nextUrl);
+          finishSignIn(result.user);
         },
         onError: (error) => {
           // A real rejection (wrong password, unknown account, suspended,
@@ -135,7 +165,9 @@ export function AuthFormCard({
   function handleGoogleCredential(credential: string) {
     setFormError(null);
     googleLoginMutation.mutate(
-      { credential },
+      // If a role was already chosen, send it: the backend uses it only to
+      // create a brand-new account and ignores it for an existing one.
+      { credential, role: selectedRole ?? undefined },
       {
         // The backend is the sole authority here: it already verified the
         // Google credential cryptographically, then either signed in the
@@ -150,8 +182,15 @@ export function AuthFormCard({
             return;
           }
           toast.success(result.isNewUser ? t("auth:registerSuccess") : t("auth:loginWelcomeToast"));
-          if (onSuccess) onSuccess();
-          else router.push(nextUrl);
+          if (!result.isNewUser && selectedRole && result.user.role !== selectedRole) {
+            // Existing account: its stored role wins, never silently converted.
+            toast.info(
+              t("auth:roleChoice.existingRoleKept", {
+                role: t(result.user.role === "SELLER" ? "auth:roleSeller" : "auth:roleBuyer"),
+              }),
+            );
+          }
+          finishSignIn(result.user);
         },
         onError: () => {
           setFormError(t("auth:googleAuthFailed"));
@@ -170,8 +209,7 @@ export function AuthFormCard({
           setPendingGoogleCredential(null);
           if (result.needsRole) return; // unreachable once a role is sent, kept for type-safety
           toast.success(t("auth:registerSuccess"));
-          if (onSuccess) onSuccess();
-          else router.push(nextUrl);
+          finishSignIn(result.user);
         },
         onError: () => {
           setPendingGoogleCredential(null);
@@ -190,6 +228,11 @@ export function AuthFormCard({
   function handleRegisterSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
+
+    if (!selectedRole) {
+      setFormError(t("auth:roleChoice.required"));
+      return;
+    }
 
     if (!registerEmail || !registerPassword) {
       setFormError(t("auth:validation.fillRequiredFields"));
@@ -211,23 +254,19 @@ export function AuthFormCard({
         password: registerPassword,
         firstName,
         lastName,
-        // Public self-registration only ever creates a Seller account —
-        // there is no UI (here or anywhere else) that can select Admin, and
-        // the backend independently rejects any other role value regardless
-        // of what a client sends (see RegisterDto).
-        role: "SELLER",
+        // Only BUYER or SELLER can be chosen here; the backend's RegisterDto
+        // independently rejects anything else (e.g. "ADMIN") and stores the
+        // role on the user record — the only place it is read from later.
+        role: selectedRole,
       },
       {
         onSuccess: () => {
+          clearIntendedRole();
           setIsSuccessState(true);
         },
         onError: (error) => {
-          if (error instanceof ApiError && error.code === "AUTH_EMAIL_TAKEN") {
-            setFormError(translateAuthError(error, t));
-            return;
-          }
-          // Show successful state for complete visual flow demonstration
-          setIsSuccessState(true);
+          // Surface the backend's validation reason (e.g. password length).
+          setFormError(friendlyErrorMessage(error, t, { showValidationDetail: true }));
         },
       },
     );
@@ -450,6 +489,16 @@ export function AuthFormCard({
           ) : (
             /* TAB 2: REGISTER FORM */
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-foreground">{t("auth:roleChoice.question")}</p>
+                <RoleChoiceCards
+                  variant="compact"
+                  selected={selectedRole}
+                  onSelect={selectRole}
+                  disabled={isSubmitting}
+                />
+              </div>
+
               {/* Full Name */}
               <div className="relative group">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-muted-foreground group-focus-within:text-blue-500 transition-colors">
@@ -600,6 +649,7 @@ export function AuthFormCard({
           selectable option here or anywhere in this flow. */}
       <GoogleRoleSelectDialog
         open={pendingGoogleCredential !== null}
+        initialRole={selectedRole}
         onCancel={handleGoogleRoleCancel}
         onContinue={handleGoogleRoleContinue}
         isSubmitting={googleLoginMutation.isPending}

@@ -45,11 +45,21 @@ export const businessesApi = {
   updateListing: (id: string, input: UpdateListingInput) =>
     apiFetch<OwnedListing>(`/businesses/${id}/listing`, { method: "PATCH", body: input }),
 
-  publish: (id: string) =>
-    apiFetch<OwnedListing>(`/businesses/${id}/publish`, { method: "POST" }),
+  /** DRAFT/REJECTED → PENDING_REVIEW. Only an admin can then publish it. */
+  submitForReview: (id: string) =>
+    apiFetch<OwnedBusiness>(`/businesses/${id}/submit-review`, { method: "POST" }),
 
+  /** PENDING_REVIEW → DRAFT, to keep editing. */
+  withdrawSubmission: (id: string) =>
+    apiFetch<OwnedBusiness>(`/businesses/${id}/withdraw-submission`, { method: "POST" }),
+
+  /** PUBLISHED → PAUSED. */
   unpublish: (id: string) =>
-    apiFetch<OwnedListing>(`/businesses/${id}/unpublish`, { method: "POST" }),
+    apiFetch<OwnedBusiness>(`/businesses/${id}/unpublish`, { method: "POST" }),
+
+  /** PAUSED → PUBLISHED (refused while a deal on the business is active). */
+  resume: (id: string) =>
+    apiFetch<OwnedBusiness>(`/businesses/${id}/resume`, { method: "POST" }),
 
   addMetric: (id: string, input: CreateMetricInput) =>
     apiFetch<BusinessMetric>(`/businesses/${id}/metrics`, { method: "POST", body: input }),

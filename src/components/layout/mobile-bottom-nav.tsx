@@ -2,21 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Store, HandCoins, Handshake, MessageSquare, LayoutDashboard } from "lucide-react";
+import { Store, Briefcase, HandCoins, Handshake, MessageSquare, LayoutDashboard } from "lucide-react";
 import { useTranslation } from "@/i18n/client";
 import { cn } from "@/lib/utils";
+import { isSellerRole } from "@/lib/auth/roles";
+import type { UserRole } from "@/types/domain";
 
-const mobileItems = [
-  { href: "/marketplace", labelKey: "marketShort", icon: Store },
+const marketItem = { href: "/marketplace", labelKey: "marketShort", icon: Store };
+const businessesItem = { href: "/dashboard/businesses", labelKey: "myBusinesses", icon: Briefcase };
+
+const sharedItems = [
   { href: "/dashboard/offers", labelKey: "offers", icon: HandCoins },
   { href: "/dashboard/deals", labelKey: "deals", icon: Handshake },
   { href: "/dashboard/messages", labelKey: "messages", icon: MessageSquare },
   { href: "/dashboard", labelKey: "overview", icon: LayoutDashboard },
 ];
 
-export function MobileBottomNav() {
+/** `role` is passed inside the dashboard; the public site (no role) shows the marketplace. */
+export function MobileBottomNav({ role }: { role?: UserRole } = {}) {
   const pathname = usePathname();
   const { t } = useTranslation("navigation");
+  // Sellers who aren't also buyers get their businesses instead of the marketplace.
+  const firstItem = role && isSellerRole(role) && role !== "BUYER_SELLER" ? businessesItem : marketItem;
+  const mobileItems = [firstItem, ...sharedItems];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 flex h-14 items-center justify-around border-t border-border/80 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 md:hidden">

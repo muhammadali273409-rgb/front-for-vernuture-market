@@ -22,6 +22,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCreateOffer } from "@/hooks/use-offers";
 import { offerSchema, type OfferValues } from "@/lib/validations/offer";
 import { useTranslation } from "@/i18n/client";
+import { isBuyerRole } from "@/lib/auth/roles";
 
 export function MakeOfferDialog({ businessId, currency }: { businessId: string; currency: string }) {
   const { t } = useTranslation("offers");
@@ -47,6 +48,10 @@ export function MakeOfferDialog({ businessId, currency }: { businessId: string; 
       },
     );
   }
+
+  // Offers are a buy-side action (the backend returns 403 for seller-only
+  // accounts). Signed-out visitors still see it and are sent to log in.
+  if (user && !isBuyerRole(user.role)) return null;
 
   return (
     <Dialog

@@ -14,6 +14,8 @@ interface GoogleRoleSelectDialogProps {
   onCancel: () => void;
   onContinue: (role: GoogleRole) => void;
   isSubmitting: boolean;
+  /** A Buyer/Seller choice already made (landing page / register tab), preselected here. */
+  initialRole?: GoogleRole | null;
 }
 
 /**
@@ -29,9 +31,10 @@ export function GoogleRoleSelectDialog({
   onCancel,
   onContinue,
   isSubmitting,
+  initialRole = null,
 }: GoogleRoleSelectDialogProps) {
   const { t } = useTranslation(["auth"] as const);
-  const [selected, setSelected] = React.useState<GoogleRole | null>(null);
+  const [selected, setSelected] = React.useState<GoogleRole | null>(initialRole);
 
   return (
     <Dialog

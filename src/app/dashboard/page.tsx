@@ -24,16 +24,17 @@ import { useWatchlist } from "@/hooks/use-watchlist";
 import { offerStatusKey, offerStatusVariant, dealStatusKey } from "@/lib/utils/labels";
 import { formatCompactMoney, formatRelativeTime } from "@/lib/utils/format";
 import { useTranslation } from "@/i18n/client";
+import { isSellerRole } from "@/lib/auth/roles";
 
 export default function DashboardPage() {
   const { t } = useTranslation(["dashboard", "offers", "common", "messages", "deals"] as const);
   const { data: user } = useCurrentUser();
-  const { data: businesses = [], isLoading: businessesLoading } = useMyBusinesses();
+  const isSeller = isSellerRole(user?.role);
+  const { data: businesses = [], isLoading: businessesLoading } = useMyBusinesses({ enabled: isSeller });
   const { data: offers = [], isLoading: offersLoading } = useMyOffers();
   const { data: deals = [] } = useDeals();
   const { data: conversations = [] } = useConversations();
   const { data: watchlist = [] } = useWatchlist();
-  const isSeller = user?.role === "SELLER";
 
   const name = user?.profile?.firstName || user?.email?.split("@")[0] || t("common:guest");
   const pendingOffers = offers.filter((o) => ["SUBMITTED", "COUNTERED", "VIEWED"].includes(o.status));
@@ -50,10 +51,10 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-mono text-xs font-semibold uppercase text-muted-foreground">
-              {user?.role === "SELLER"
-                ? t("dashboard:workspaceLabelSeller")
-                : user?.role === "ADMIN"
-                  ? t("dashboard:workspaceLabelAdmin")
+              {user?.role === "ADMIN"
+                ? t("dashboard:workspaceLabelAdmin")
+                : isSeller
+                  ? t("dashboard:workspaceLabelSeller")
                   : t("dashboard:workspaceLabelBuyer")}
             </span>
           </div>

@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/shared/logo";
 import { useUiStore } from "@/stores/ui-store";
-import { dashboardNav } from "@/config/nav";
+import { dashboardNavFor } from "@/config/nav";
 import { useTranslation } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 import type { CurrentUser } from "@/types/domain";
 
-export function MobileNav({ user: _user }: { user: CurrentUser }) {
+export function MobileNav({ user }: { user: CurrentUser }) {
   const pathname = usePathname();
   const { mobileNavOpen, setMobileNavOpen } = useUiStore();
   const { t } = useTranslation("navigation");
@@ -31,7 +31,7 @@ export function MobileNav({ user: _user }: { user: CurrentUser }) {
           </SheetTitle>
         </SheetHeader>
         <nav className="space-y-1 overflow-y-auto p-3">
-          {dashboardNav.map((item) => {
+          {dashboardNavFor(user.role).map((item) => {
             const Icon = item.icon;
             const active = item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
             return (
