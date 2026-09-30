@@ -60,6 +60,7 @@
     "businessNamePlaceholder": "Acme Analytics",
     "descriptionPlaceholder": "What does the business do, and why is it a good opportunity?",
     "selectCategoryPlaceholder": "Select a category",
+    "noCategoriesHint": "No categories are available yet. You can leave this blank and set it later.",
     "businessModelPlaceholder": "SaaS, marketplace, ecommerce…",
     "countryCode": "Country code",
     "countryCodePlaceholder": "US",

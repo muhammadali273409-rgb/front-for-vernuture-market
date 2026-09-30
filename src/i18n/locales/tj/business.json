@@ -60,6 +60,7 @@
     "businessNamePlaceholder": "Acme Analytics",
     "descriptionPlaceholder": "Бизнес чӣ кор мекунад ва чаро он имконияти хуб аст?",
     "selectCategoryPlaceholder": "Категорияро интихоб кунед",
+    "noCategoriesHint": "Ҳоло категорияҳо нестанд. Метавонед ин майдонро холӣ гузоред ва баъдтар интихоб кунед.",
     "businessModelPlaceholder": "SaaS, бозор, тиҷорати электронӣ…",
     "countryCode": "Коди кишвар",
     "countryCodePlaceholder": "US",

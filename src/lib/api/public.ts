@@ -1,5 +1,5 @@
 import { env } from "@/lib/config/env";
-import { ApiError, isApiErrorBody, unwrapEnvelope } from "@/lib/api/error";
+import { apiErrorFromResponse, unwrapEnvelope } from "@/lib/api/error";
 
 interface PublicFetchOptions {
   revalidate?: number | false;
@@ -19,10 +19,7 @@ export async function publicApiFetch<T>(path: string, options: PublicFetchOption
   const parsed = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
-    if (isApiErrorBody(parsed)) {
-      throw new ApiError(res.status, parsed.error.code, parsed.error.message, parsed.requestId);
-    }
-    throw new ApiError(res.status, "UNKNOWN_ERROR", res.statusText || "Request failed");
+    throw apiErrorFromResponse(res, parsed);
   }
 
   return unwrapEnvelope<T>(parsed);

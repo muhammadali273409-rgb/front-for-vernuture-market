@@ -20,7 +20,8 @@ export class ApiError extends Error {
  * (either a naming difference, or a legacy alias still sent by some
  * endpoints). Anything not listed here is looked up under its own code, and
  * anything not found there falls back to `errors:UNKNOWN_ERROR` — a raw
- * backend/exception message is never shown to the user.
+ * backend/exception message is never shown to the user, except a
+ * validation message when the caller opts in via `showValidationDetail`.
  */
 const ERROR_CODE_ALIASES: Record<string, string> = {
   FORBIDDEN: "AUTH_FORBIDDEN",
@@ -30,8 +31,24 @@ const ERROR_CODE_ALIASES: Record<string, string> = {
   UNAUTHORIZED: "AUTH_UNAUTHORIZED",
 };
 
-export function friendlyErrorMessage(error: unknown, t: TFunction): string {
+export interface FriendlyErrorOptions {
+  /**
+   * Show the backend's own message for a validation failure (400/422)
+   * instead of the generic translated text. Opt-in per form, since the
+   * backend's validation messages are English-only.
+   */
+  showValidationDetail?: boolean;
+}
+
+export function friendlyErrorMessage(
+  error: unknown,
+  t: TFunction,
+  options: FriendlyErrorOptions = {},
+): string {
   if (error instanceof ApiError) {
+    if (options.showValidationDetail && isValidationError(error) && hasSpecificMessage(error)) {
+      return error.message;
+    }
     const key = ERROR_CODE_ALIASES[error.code] ?? error.code;
     return t(`errors:${key}`, { defaultValue: t("errors:UNKNOWN_ERROR") });
   }
@@ -39,6 +56,48 @@ export function friendlyErrorMessage(error: unknown, t: TFunction): string {
     return t("errors:NETWORK_ERROR");
   }
   return t("errors:UNKNOWN_ERROR");
+}
+
+function isValidationError(error: ApiError): boolean {
+  return error.code === "VALIDATION_ERROR" || error.status === 400 || error.status === 422;
+}
+
+/** True when the message says more than the bare HTTP status text ("Bad Request"). */
+function hasSpecificMessage(error: ApiError): boolean {
+  const message = error.message.trim();
+  return message !== "" && message.toLowerCase() !== "bad request" && message !== "Request failed";
+}
+
+function messageFromUnknownBody(parsed: unknown): string | undefined {
+  if (!parsed || typeof parsed !== "object") return undefined;
+  const { message } = parsed as { message?: unknown };
+  if (typeof message === "string") return message;
+  // NestJS ValidationPipe sends one string per failed constraint.
+  if (Array.isArray(message)) {
+    const parts = message.filter((m): m is string => typeof m === "string");
+    if (parts.length > 0) return parts.join(". ");
+  }
+  const { error } = parsed as { error?: unknown };
+  return typeof error === "string" ? error : undefined;
+}
+
+/**
+ * Build the ApiError for a non-OK response. Handles the documented
+ * `{ error: { code, message } }` envelope as well as the plain NestJS shape
+ * (`{ error: "Bad Request", message?: string | string[] }`) the backend
+ * still returns for request validation failures.
+ */
+export function apiErrorFromResponse(res: Response, parsed: unknown): ApiError {
+  if (isApiErrorBody(parsed)) {
+    return new ApiError(res.status, parsed.error.code, parsed.error.message, parsed.requestId);
+  }
+  const requestId =
+    parsed && typeof parsed === "object" && typeof (parsed as { requestId?: unknown }).requestId === "string"
+      ? (parsed as { requestId: string }).requestId
+      : undefined;
+  const code = res.status === 400 || res.status === 422 ? "VALIDATION_ERROR" : "UNKNOWN_ERROR";
+  const message = messageFromUnknownBody(parsed) ?? (res.statusText || "Request failed");
+  return new ApiError(res.status, code, message, requestId);
 }
 
 export function isApiErrorBody(value: unknown): value is ApiErrorBody {

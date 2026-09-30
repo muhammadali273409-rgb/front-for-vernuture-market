@@ -60,6 +60,7 @@
     "businessNamePlaceholder": "Acme Analytics",
     "descriptionPlaceholder": "Чем занимается бизнес и почему это хорошая возможность?",
     "selectCategoryPlaceholder": "Выберите категорию",
+    "noCategoriesHint": "Категории пока не добавлены. Можно оставить поле пустым и указать его позже.",
     "businessModelPlaceholder": "SaaS, маркетплейс, e-commerce…",
     "countryCode": "Код страны",
     "countryCodePlaceholder": "US",

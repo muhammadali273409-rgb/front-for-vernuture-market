@@ -26,7 +26,8 @@ import { useTranslation } from "@/i18n/client";
 export default function NewBusinessPage() {
   const { t } = useTranslation(["business", "errors", "common"]);
   const router = useRouter();
-  const { data: categories = [] } = useCategories();
+  const { data: categories = [], isSuccess: categoriesLoaded } = useCategories();
+  const noCategories = categoriesLoaded && categories.length === 0;
   const createBusiness = useCreateBusiness();
 
   const form = useForm<CreateBusinessValues>({
@@ -55,7 +56,8 @@ export default function NewBusinessPage() {
       },
       {
         onSuccess: (business) => router.push(`/dashboard/businesses/${business.id}`),
-        onError: (error) => toast.error(friendlyErrorMessage(error, t)),
+        onError: (error) =>
+          toast.error(friendlyErrorMessage(error, t, { showValidationDetail: true })),
       },
     );
   }
@@ -106,7 +108,7 @@ export default function NewBusinessPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("category")}</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select value={field.value} onValueChange={field.onChange} disabled={noCategories}>
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder={t("seller.selectCategoryPlaceholder")} />
@@ -120,6 +122,7 @@ export default function NewBusinessPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                      {noCategories && <FormDescription>{t("seller.noCategoriesHint")}</FormDescription>}
                       <FormMessage />
                     </FormItem>
                   )}

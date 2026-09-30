@@ -1,4 +1,4 @@
-import { ApiError, isApiErrorBody, unwrapEnvelope } from "@/lib/api/error";
+import { apiErrorFromResponse, unwrapEnvelope } from "@/lib/api/error";
 
 /**
  * Same-origin proxy (see src/app/api/backend/[...path]/route.ts) instead of
@@ -83,10 +83,7 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const parsed = await parseBody(res);
 
   if (!res.ok) {
-    if (isApiErrorBody(parsed)) {
-      throw new ApiError(res.status, parsed.error.code, parsed.error.message, parsed.requestId);
-    }
-    throw new ApiError(res.status, "UNKNOWN_ERROR", res.statusText || "Request failed");
+    throw apiErrorFromResponse(res, parsed);
   }
 
   return unwrapEnvelope<T>(parsed);
