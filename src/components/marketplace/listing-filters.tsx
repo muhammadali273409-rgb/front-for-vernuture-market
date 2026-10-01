@@ -69,7 +69,7 @@ export function ListingFilters({ values, onChange, onReset }: ListingFiltersProp
           <SelectContent>
             <SelectItem value="all">{t("allCategories")}</SelectItem>
             {categories.map((category) => (
-              <SelectItem key={category.id} value={category.name}>
+              <SelectItem key={category.id} value={category.id}>
                 {category.name}
               </SelectItem>
             ))}
@@ -147,7 +147,7 @@ export function ListingFilters({ values, onChange, onReset }: ListingFiltersProp
       <div className="space-y-1.5 border-t border-border/60 pt-3">
         <Label className="text-xs font-medium">{t("sortResults")}</Label>
         <Select
-          value={`${values.sortBy ?? "createdAt"}:${values.sortDir ?? "desc"}`}
+          value={`${(values.sortBy as string) === "askingPrice" ? "price" : (values.sortBy ?? "createdAt")}:${values.sortDir ?? "desc"}`}
           onValueChange={(value) => {
             const [sortBy, sortDir] = value.split(":") as [SearchListingsParams["sortBy"], SearchListingsParams["sortDir"]];
             onChange({ ...values, sortBy, sortDir });
@@ -159,8 +159,8 @@ export function ListingFilters({ values, onChange, onReset }: ListingFiltersProp
           <SelectContent>
             <SelectItem value="createdAt:desc">{t("newestFirst")}</SelectItem>
             <SelectItem value="createdAt:asc">{t("oldestFirst")}</SelectItem>
-            <SelectItem value="askingPrice:asc">{t("priceLowToHigh")}</SelectItem>
-            <SelectItem value="askingPrice:desc">{t("priceHighToLow")}</SelectItem>
+            <SelectItem value="price:asc">{t("priceLowToHigh")}</SelectItem>
+            <SelectItem value="price:desc">{t("priceHighToLow")}</SelectItem>
           </SelectContent>
         </Select>
       </div>

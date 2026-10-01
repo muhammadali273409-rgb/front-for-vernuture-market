@@ -17,12 +17,28 @@ import { ErrorState } from "@/components/shared/error-state";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { ListingCardSkeleton } from "@/components/marketplace/listing-card-skeleton";
 import { ListingFilters } from "@/components/marketplace/listing-filters";
-import { useInfiniteListings } from "@/hooks/use-listings";
+import { useInfiniteListings, useCategories } from "@/hooks/use-listings";
 import { useUiStore } from "@/stores/ui-store";
 import { useTranslation } from "@/i18n/client";
 import type { SearchListingsParams } from "@/lib/api/listings";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isValidUuid(id?: string | null): boolean {
+  return typeof id === "string" && UUID_REGEX.test(id);
+}
+
 function paramsFromSearch(searchParams: URLSearchParams): SearchListingsParams {
+  const sortBy = searchParams.get("sortBy");
+  const normalizedSortBy =
+    sortBy === "askingPrice" || sortBy === "price"
+      ? "price"
+      : sortBy === "mrr"
+        ? "mrr"
+        : sortBy === "createdAt"
+          ? "createdAt"
+          : undefined;
+
   return {
     categoryId: searchParams.get("categoryId") ?? undefined,
     minPrice: searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined,
@@ -30,12 +46,12 @@ function paramsFromSearch(searchParams: URLSearchParams): SearchListingsParams {
     minMrr: searchParams.get("minMrr") ? Number(searchParams.get("minMrr")) : undefined,
     verified: searchParams.get("verified") === "true" ? true : undefined,
     country: searchParams.get("country") ?? undefined,
-    sortBy: (searchParams.get("sortBy") as SearchListingsParams["sortBy"]) ?? undefined,
+    sortBy: normalizedSortBy,
     sortDir: (searchParams.get("sortDir") as SearchListingsParams["sortDir"]) ?? undefined,
   };
 }
 
-const QUICK_CATEGORIES = [
+const STATIC_QUICK_CATEGORIES = [
   { id: "all", key: "all" },
   { id: "SaaS", key: "saasAi" },
   { id: "Developer Tools", key: "devTools" },
@@ -51,19 +67,61 @@ export function MarketplaceView() {
   const filters = paramsFromSearch(searchParams);
   const { marketplaceView, setMarketplaceView } = useUiStore();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const { data: categories = [] } = useCategories();
+
+  // If categoryId in URL is a slug/name, resolve it to backend UUID if possible
+  const resolvedCategoryId = React.useMemo(() => {
+    if (!filters.categoryId || filters.categoryId === "all") return undefined;
+    if (isValidUuid(filters.categoryId)) return filters.categoryId;
+    const found = categories.find(
+      (c) =>
+        c.id === filters.categoryId ||
+        c.name.toLowerCase() === filters.categoryId?.toLowerCase() ||
+        c.slug.toLowerCase() === filters.categoryId?.toLowerCase(),
+    );
+    return found ? found.id : filters.categoryId;
+  }, [filters.categoryId, categories]);
+
+  const queryFilters = React.useMemo(
+    () => ({
+      ...filters,
+      categoryId: resolvedCategoryId,
+    }),
+    [filters, resolvedCategoryId],
+  );
 
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useInfiniteListings(filters);
+    useInfiniteListings(queryFilters);
 
-  const rawListings = data?.pages.flatMap((page) => page.data) ?? [];
-  const listings = searchTerm
-    ? rawListings.filter(
-        (l) =>
-          l.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          l.headline?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          l.category?.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
-    : rawListings;
+  const rawListings = React.useMemo(
+    () => data?.pages.flatMap((page) => page.data) ?? [],
+    [data],
+  );
+
+  // If category filter is by text name (e.g. static chip and not backend UUID), filter locally
+  const activeCategoryFilter = filters.categoryId;
+  const activeCategoryName = categories.find(
+    (c) => c.id === activeCategoryFilter || c.name.toLowerCase() === activeCategoryFilter?.toLowerCase(),
+  )?.name?.toLowerCase() ?? activeCategoryFilter?.toLowerCase();
+
+  const filteredByCategory = React.useMemo(() => {
+    if (!activeCategoryFilter || activeCategoryFilter === "all") return rawListings;
+    if (isValidUuid(activeCategoryFilter)) return rawListings;
+    return rawListings.filter(
+      (l) => l.category && l.category.toLowerCase().includes(activeCategoryName ?? ""),
+    );
+  }, [rawListings, activeCategoryFilter, activeCategoryName]);
+
+  const listings = React.useMemo(() => {
+    if (!searchTerm) return filteredByCategory;
+    const term = searchTerm.toLowerCase();
+    return filteredByCategory.filter(
+      (l) =>
+        l.name.toLowerCase().includes(term) ||
+        l.headline?.toLowerCase().includes(term) ||
+        l.category?.toLowerCase().includes(term),
+    );
+  }, [filteredByCategory, searchTerm]);
 
   function updateFilters(next: SearchListingsParams) {
     const search = new URLSearchParams();
@@ -147,27 +205,60 @@ export function MarketplaceView() {
 
       {/* Quick Category Chips */}
       <div className="mt-4 flex flex-wrap items-center gap-1.5 overflow-x-auto pb-2">
-        {QUICK_CATEGORIES.map((cat) => {
-          const isSelected = activeCategory.toLowerCase().includes(cat.id.toLowerCase()) || (cat.id === "all" && !filters.categoryId);
-          return (
-            <button
-              key={cat.id}
-              onClick={() => {
-                updateFilters({
-                  ...filters,
-                  categoryId: cat.id === "all" ? undefined : cat.id,
-                });
-              }}
-              className={`rounded-md border px-3 py-1 text-xs font-medium transition-all ${
-                isSelected
-                  ? "border-primary bg-primary/10 text-primary font-semibold"
-                  : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground"
-              }`}
-            >
-              {t(`quickCategories.${cat.key}`)}
-            </button>
-          );
-        })}
+        <button
+          onClick={() => updateFilters({ ...filters, categoryId: undefined })}
+          className={`rounded-md border px-3 py-1 text-xs font-medium transition-all ${
+            !filters.categoryId || filters.categoryId === "all"
+              ? "border-primary bg-primary/10 text-primary font-semibold"
+              : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground"
+          }`}
+        >
+          {t("quickCategories.all")}
+        </button>
+
+        {categories.length > 0
+          ? categories.map((cat) => {
+              const isSelected = filters.categoryId === cat.id || filters.categoryId?.toLowerCase() === cat.name.toLowerCase();
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    updateFilters({
+                      ...filters,
+                      categoryId: isSelected ? undefined : cat.id,
+                    });
+                  }}
+                  className={`rounded-md border px-3 py-1 text-xs font-medium transition-all ${
+                    isSelected
+                      ? "border-primary bg-primary/10 text-primary font-semibold"
+                      : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              );
+            })
+          : STATIC_QUICK_CATEGORIES.filter((c) => c.id !== "all").map((cat) => {
+              const isSelected = activeCategory.toLowerCase().includes(cat.id.toLowerCase());
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    updateFilters({
+                      ...filters,
+                      categoryId: isSelected ? undefined : cat.id,
+                    });
+                  }}
+                  className={`rounded-md border px-3 py-1 text-xs font-medium transition-all ${
+                    isSelected
+                      ? "border-primary bg-primary/10 text-primary font-semibold"
+                      : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground"
+                  }`}
+                >
+                  {t(`quickCategories.${cat.key}`)}
+                </button>
+              );
+            })}
       </div>
 
       {/* Main Grid: Sidebar + Listings */}
