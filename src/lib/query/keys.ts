@@ -1,6 +1,7 @@
 export const queryKeys = {
   me: ["me"] as const,
-  listings: (params?: Record<string, unknown>) => ["listings", params ?? {}] as const,
+  listings: (params?: Record<string, unknown>) => ["listings", "flat", params ?? {}] as const,
+  infiniteListings: (params?: Record<string, unknown>) => ["listings", "infinite", params ?? {}] as const,
   listing: (idOrSlug: string) => ["listing", idOrSlug] as const,
   categories: ["categories"] as const,
   myBusinesses: ["businesses", "mine"] as const,

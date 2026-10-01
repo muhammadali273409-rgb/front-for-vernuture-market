@@ -15,12 +15,11 @@ export function useListings(params: SearchListingsParams) {
 
 export function useInfiniteListings(params: Omit<SearchListingsParams, "cursor">) {
   return useInfiniteQuery({
-    queryKey: queryKeys.listings(params as Record<string, unknown>),
+    queryKey: queryKeys.infiniteListings(params as Record<string, unknown>),
     queryFn: ({ pageParam }) => listingsApi.search({ ...params, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasMore ? (lastPage.pagination.nextCursor ?? undefined) : undefined,
-    placeholderData: (prev) => prev,
   });
 }
 

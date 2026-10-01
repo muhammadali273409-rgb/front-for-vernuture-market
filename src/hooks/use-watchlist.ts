@@ -4,11 +4,15 @@ import { queryKeys } from "@/lib/query/keys";
 import { toast } from "sonner";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 export function useWatchlist() {
+  const { data: user } = useCurrentUser();
   return useQuery({
     queryKey: queryKeys.watchlist,
     queryFn: () => watchlistApi.list(),
+    enabled: Boolean(user),
+    retry: false,
   });
 }
 
