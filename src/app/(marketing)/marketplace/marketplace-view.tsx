@@ -17,15 +17,13 @@ import { ErrorState } from "@/components/shared/error-state";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { ListingCardSkeleton } from "@/components/marketplace/listing-card-skeleton";
 import { ListingFilters } from "@/components/marketplace/listing-filters";
-import { useInfiniteListings, useCategories, useListingSearch } from "@/hooks/use-listings";
+import { useInfiniteListings, useCategories } from "@/hooks/use-listings";
 import { useUiStore } from "@/stores/ui-store";
 import { useTranslation } from "@/i18n/client";
 import type { SearchListingsParams } from "@/lib/api/listings";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Cap on how many backend pages a single search term walks automatically. */
-const SEARCH_SCAN_PAGES = 5;
 const SEARCH_DEBOUNCE_MS = 350;
 
 function isValidUuid(id?: string | null): boolean {
@@ -77,7 +75,6 @@ export function MarketplaceView() {
   // user types and only syncs to the URL once typing settles.
   const urlQuery = searchParams.get("q") ?? "";
   const searchTerm = urlQuery.trim();
-  const isSearching = searchTerm.length > 0;
 
   const [searchInput, setSearchInput] = React.useState(urlQuery);
   const [syncedUrlQuery, setSyncedUrlQuery] = React.useState(urlQuery);
@@ -118,39 +115,19 @@ export function MarketplaceView() {
     return found ? found.id : filters.categoryId;
   }, [filters.categoryId, categories]);
 
+  // The search term is matched server-side (GET /listings?q=…), so it pages
+  // and sorts together with every other filter.
   const queryFilters = React.useMemo(
     () => ({
       ...filters,
       categoryId: resolvedCategoryId,
+      q: searchTerm || undefined,
     }),
-    [filters, resolvedCategoryId],
+    [filters, resolvedCategoryId, searchTerm],
   );
 
-  const browseQuery = useInfiniteListings(queryFilters);
-  // Text search has no backend equivalent, so when a term is active we pull the
-  // widest pages the API allows and match locally.
-  const searchQuery = useListingSearch(queryFilters, isSearching);
-  const activeQuery = isSearching ? searchQuery : browseQuery;
-
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    activeQuery;
-
-  const scannedPages = searchQuery.data?.pages.length ?? 0;
-  const {
-    hasNextPage: searchHasNextPage,
-    isFetching: searchIsFetching,
-    isFetchingNextPage: searchIsFetchingNextPage,
-    fetchNextPage: fetchSearchNextPage,
-  } = searchQuery;
-  const scanLimitReached = isSearching && scannedPages >= SEARCH_SCAN_PAGES && searchHasNextPage;
-
-  // Keep walking the backend's pages while a term is active, otherwise the term
-  // could only ever match the first page that happened to be loaded.
-  React.useEffect(() => {
-    if (!isSearching || !searchHasNextPage || searchIsFetchingNextPage) return;
-    if (scannedPages >= SEARCH_SCAN_PAGES) return;
-    void fetchSearchNextPage();
-  }, [isSearching, scannedPages, searchHasNextPage, searchIsFetchingNextPage, fetchSearchNextPage]);
+    useInfiniteListings(queryFilters);
 
   const rawListings = React.useMemo(
     () => data?.pages.flatMap((page) => page.data) ?? [],
@@ -163,27 +140,13 @@ export function MarketplaceView() {
     (c) => c.id === activeCategoryFilter || c.name.toLowerCase() === activeCategoryFilter?.toLowerCase(),
   )?.name?.toLowerCase() ?? activeCategoryFilter?.toLowerCase();
 
-  const filteredByCategory = React.useMemo(() => {
+  const listings = React.useMemo(() => {
     if (!activeCategoryFilter || activeCategoryFilter === "all") return rawListings;
     if (isValidUuid(activeCategoryFilter)) return rawListings;
     return rawListings.filter(
       (l) => l.category && l.category.toLowerCase().includes(activeCategoryName ?? ""),
     );
   }, [rawListings, activeCategoryFilter, activeCategoryName]);
-
-  const listings = React.useMemo(() => {
-    if (!isSearching) return filteredByCategory;
-    // Every whitespace-separated token has to match, so "saas analytics"
-    // narrows rather than widens the result set.
-    const tokens = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
-    return filteredByCategory.filter((l) => {
-      const haystack = [l.name, l.slug, l.headline, l.category, l.country]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return tokens.every((token) => haystack.includes(token));
-    });
-  }, [filteredByCategory, isSearching, searchTerm]);
 
   function updateFilters(next: SearchListingsParams) {
     const search = new URLSearchParams();
@@ -370,27 +333,17 @@ export function MarketplaceView() {
                 ))}
               </div>
 
-              {isSearching ? (
-                <p className="mt-8 text-center text-xs text-muted-foreground">
-                  {searchIsFetching
-                    ? t("searchScanning")
-                    : scanLimitReached
-                      ? t("searchScanLimitReached")
-                      : t("searchScannedAll", { count: listings.length })}
-                </p>
-              ) : (
-                hasNextPage && (
-                  <div className="mt-10 flex justify-center">
-                    <Button
-                      variant="outline"
-                      className="h-10 px-6 font-semibold"
-                      onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                    >
-                      {isFetchingNextPage ? t("loadingMore") : t("loadMoreBusinesses")}
-                    </Button>
-                  </div>
-                )
+              {hasNextPage && (
+                <div className="mt-10 flex justify-center">
+                  <Button
+                    variant="outline"
+                    className="h-10 px-6 font-semibold"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? t("loadingMore") : t("loadMoreBusinesses")}
+                  </Button>
+                </div>
               )}
             </>
           )}

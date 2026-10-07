@@ -120,8 +120,9 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
       <div className="flex flex-wrap items-center gap-3 border-t pt-4">
         {(business.status === "DRAFT" || business.status === "REJECTED") && (
           <>
-            <Button onClick={() => runAction("submitForReview", "business:seller.toastSubmittedForReview")} disabled={pending}>
-              {pending ? t("business:seller.submittingEllipsis") : t("business:seller.submitForReview")}
+            {/* Direct publish: the listing goes live on the marketplace immediately. */}
+            <Button onClick={() => runAction("publish", "business:project.toastPublished")} disabled={pending}>
+              {pending ? t("business:seller.publishingEllipsis") : t("business:seller.publishListing")}
             </Button>
             <p className="text-xs text-muted-foreground">
               {business.status === "REJECTED"
@@ -132,6 +133,10 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
         )}
         {business.status === "PENDING_REVIEW" && (
           <>
+            {/* Submissions made before direct publishing existed can go live directly too. */}
+            <Button onClick={() => runAction("publish", "business:project.toastPublished")} disabled={pending}>
+              {pending ? t("business:seller.publishingEllipsis") : t("business:seller.publishListing")}
+            </Button>
             <Button
               variant="outline"
               onClick={() => runAction("withdrawSubmission", "business:seller.toastSubmissionWithdrawn")}
@@ -139,7 +144,6 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
             >
               {t("business:seller.withdrawSubmission")}
             </Button>
-            <p className="text-xs text-muted-foreground">{t("business:seller.pendingReviewNotice")}</p>
           </>
         )}
         {business.status === "PUBLISHED" && (

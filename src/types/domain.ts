@@ -127,16 +127,42 @@ export interface ListingVerificationBadge {
   status: VerificationStatus;
 }
 
+/** Public seller identity shown on listings — never email or account data. */
+export interface ListingSeller {
+  id: string;
+  name: string | null;
+  company: string | null;
+  avatarUrl: string | null;
+  memberSince: string;
+}
+
+export type BusinessImageKind = "LOGO" | "GALLERY";
+
+/** Listing media; `url` is a short-lived signed URL from the backend. */
+export interface BusinessImage {
+  id: string;
+  kind: BusinessImageKind;
+  url: string;
+  position: number;
+}
+
 export interface ListingSummary {
   id: string;
   slug: string;
   name: string;
   headline: string | null;
   category: string | null;
+  categoryId?: string | null;
   country: string | null;
+  city?: string | null;
+  businessModel?: string | null;
   askingPrice: number | null;
   currency: string;
   publishedAt: string | null;
+  logoUrl?: string | null;
+  coverUrl?: string | null;
+  /** The seller who published this listing. */
+  seller?: ListingSeller;
   /** Verified financial metrics disclosed by the seller, if any — never a client-side estimate. */
   metrics?: BusinessMetric[];
 }
@@ -147,6 +173,7 @@ export interface ListingDetail extends ListingSummary {
   businessModel: string | null;
   foundedAt: string | null;
   website: string | null;
+  images?: BusinessImage[];
   verifications: ListingVerificationBadge[];
 }
 
@@ -171,6 +198,7 @@ export interface OwnedBusiness {
   businessModel: string | null;
   foundedAt: string | null;
   country: string | null;
+  city: string | null;
   website: string | null;
   status: BusinessStatus;
   createdAt: string;
@@ -178,6 +206,7 @@ export interface OwnedBusiness {
   listing?: OwnedListing | null;
   category?: BusinessCategory | null;
   metrics?: BusinessMetric[];
+  images?: BusinessImage[];
 }
 
 export interface OwnedListing {

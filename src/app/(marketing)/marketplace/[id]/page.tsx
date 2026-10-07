@@ -1,9 +1,14 @@
+/* eslint-disable @next/next/no-img-element -- images are short-lived signed URLs from the private bucket */
+
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   ShieldCheck,
   Lock,
   ArrowRight,
+  Briefcase,
+  MapPin,
+  UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,6 +72,12 @@ export default async function BusinessDetailPage({ params }: PageProps) {
   const customersCount = getMetricValue(listing.metrics, "CUSTOMERS");
   const churnRate = getMetricValue(listing.metrics, "CHURN");
   const trafficMonthly = getMetricValue(listing.metrics, "TRAFFIC");
+  const annualRevenue = getMetricValue(listing.metrics, "REVENUE");
+
+  const location = [listing.city, listing.country].filter(Boolean).join(", ");
+  const gallery = (listing.images ?? []).filter((image) => image.kind === "GALLERY");
+  const seller = listing.seller;
+  const sellerName = seller?.name || seller?.company || t("business:project.sellerFallback");
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -101,8 +112,9 @@ export default async function BusinessDetailPage({ params }: PageProps) {
                 {listing.category}
               </Badge>
             )}
-            <span className="rounded-sm border border-border/60 bg-muted/40 px-2 py-0.5 text-xs font-mono uppercase text-muted-foreground">
-              {listing.country ?? t("global")}
+            <span className="flex items-center gap-1 rounded-sm border border-border/60 bg-muted/40 px-2 py-0.5 text-xs font-mono uppercase text-muted-foreground">
+              <MapPin className="size-3" />
+              {location || t("global")}
             </span>
             {listing.foundedAt && (
               <span className="text-xs text-muted-foreground">
@@ -111,9 +123,18 @@ export default async function BusinessDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            {listing.name}
-          </h1>
+          <div className="flex items-center gap-4">
+            <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted sm:size-16">
+              {listing.logoUrl ? (
+                <img src={listing.logoUrl} alt={listing.name} className="size-full object-cover" />
+              ) : (
+                <Briefcase className="size-6 text-muted-foreground" />
+              )}
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+              {listing.name}
+            </h1>
+          </div>
 
           {listing.headline && (
             <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{listing.headline}</p>
@@ -198,6 +219,34 @@ export default async function BusinessDetailPage({ params }: PageProps) {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
               <div className="space-y-6">
+                {gallery.length > 0 && (
+                  <Card className="gap-0 overflow-hidden border border-border/80 bg-card py-0">
+                    <div className="aspect-[16/9] bg-muted">
+                      <img src={gallery[0].url} alt={listing.name} className="size-full object-cover" />
+                    </div>
+                    {gallery.length > 1 && (
+                      <div className="grid grid-cols-3 gap-2 p-3 sm:grid-cols-5">
+                        {gallery.slice(1).map((image) => (
+                          <a
+                            key={image.id}
+                            href={image.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="aspect-[4/3] overflow-hidden rounded-md border border-border/60 bg-muted"
+                          >
+                            <img
+                              src={image.url}
+                              alt=""
+                              loading="lazy"
+                              className="size-full object-cover transition-transform hover:scale-105"
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </Card>
+                )}
+
                 <Card className="border border-border/80 bg-card">
                   <CardHeader className="border-b border-border/60 pb-3">
                     <CardTitle className="text-base font-semibold">{t("executiveSummaryTitle")}</CardTitle>
@@ -221,6 +270,32 @@ export default async function BusinessDetailPage({ params }: PageProps) {
 
               {/* Sidebar Asset Meta */}
               <div className="space-y-4">
+                <Card className="border border-border/80 bg-card p-5 text-xs">
+                  <h3 className="text-[11px] font-bold uppercase tracking-wider text-foreground">
+                    {t("business:project.publishedBy")}
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-primary">
+                      {seller?.avatarUrl ? (
+                        <img src={seller.avatarUrl} alt="" className="size-full object-cover" />
+                      ) : (
+                        <UserRound className="size-5" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-foreground">{sellerName}</p>
+                      {seller?.company && seller.name && (
+                        <p className="truncate text-muted-foreground">{seller.company}</p>
+                      )}
+                      {seller?.memberSince && (
+                        <p className="text-muted-foreground">
+                          {t("business:project.memberSince", { date: formatDate(seller.memberSince, locale) })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+
                 <Card className="border border-border/80 bg-card p-5 space-y-4 text-xs">
                   <h3 className="font-bold text-foreground uppercase tracking-wider text-[11px]">
                     {t("assetSpecsTitle")}
@@ -233,6 +308,26 @@ export default async function BusinessDetailPage({ params }: PageProps) {
                         {listing.country ? t("jurisdictionValue", { country: listing.country }) : t("notDisclosed")}
                       </span>
                     </div>
+                    {listing.city && (
+                      <div className="flex justify-between pt-2">
+                        <span className="text-muted-foreground">{t("business:project.city")}</span>
+                        <span className="font-medium text-foreground">{listing.city}</span>
+                      </div>
+                    )}
+                    {listing.businessModel && (
+                      <div className="flex justify-between gap-3 pt-2">
+                        <span className="text-muted-foreground">{t("business:businessModel")}</span>
+                        <span className="text-right font-medium text-foreground">{listing.businessModel}</span>
+                      </div>
+                    )}
+                    {annualRevenue !== null && (
+                      <div className="flex justify-between pt-2">
+                        <span className="text-muted-foreground">{t("business:project.annualRevenue")}</span>
+                        <span className="font-mono font-medium text-foreground">
+                          {formatCompactMoney(annualRevenue, listing.currency, locale)}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between pt-2">
                       <span className="text-muted-foreground">{t("foundedDateLabel")}</span>
                       <span className="font-medium text-foreground">

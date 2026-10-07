@@ -1,7 +1,9 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- images are short-lived signed URLs from the private bucket */
+
 import Link from "next/link";
-import { TrendingUp, Scale, Heart } from "lucide-react";
+import { TrendingUp, Scale, Heart, Briefcase, UserRound } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +35,11 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
   const arr = getMetricValue(listing.metrics, "ARR");
   const growth = getMetricValue(listing.metrics, "GROWTH");
   const profit = getMetricValue(listing.metrics, "PROFIT");
+  // Non-subscription businesses report annual revenue instead of MRR.
+  const revenue = getMetricValue(listing.metrics, "REVENUE");
+  const showRevenue = mrr === null && revenue !== null;
+  const location = [listing.city, listing.country].filter(Boolean).join(", ");
+  const sellerName = listing.seller?.company || listing.seller?.name;
   const multiple = listing.askingPrice && arr ? (listing.askingPrice / arr).toFixed(1) : null;
 
   function handleCompareClick(e: React.MouseEvent) {
@@ -56,10 +63,31 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
       <Link href={`/marketplace/${listing.slug}`} className="flex h-full flex-col">
         <Card
           className={cn(
-            "flex h-full flex-col overflow-hidden border border-border/80 bg-card transition-all duration-200 hover:border-primary/40 hover:shadow-sm",
+            "flex h-full flex-col gap-0 overflow-hidden border border-border/80 bg-card pt-0 transition-all duration-200 hover:border-primary/40 hover:shadow-sm",
             isCompared && "ring-1.5 ring-primary/60",
           )}
         >
+          {/* Cover: first gallery image, else a branded gradient with the logo */}
+          <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-primary/15 via-muted to-muted">
+            {listing.coverUrl ? (
+              <img
+                src={listing.coverUrl}
+                alt=""
+                loading="lazy"
+                className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              />
+            ) : (
+              <div className="flex size-full items-center justify-center">
+                <Briefcase className="size-8 text-primary/40" />
+              </div>
+            )}
+            {listing.logoUrl && (
+              <div className="absolute bottom-2 left-3 size-11 overflow-hidden rounded-lg border-2 border-card bg-card shadow-sm">
+                <img src={listing.logoUrl} alt="" loading="lazy" className="size-full object-cover" />
+              </div>
+            )}
+          </div>
+
           <CardContent className="flex flex-1 flex-col p-5">
             {/* Top metadata row */}
             <div className="flex items-center justify-between gap-2">
@@ -70,10 +98,9 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
                   </Badge>
                 )}
                 <span className="rounded-sm border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground uppercase">
-                  {listing.country ?? t("global")}
+                  {location || t("global")}
                 </span>
               </div>
-
             </div>
 
             {/* Title & Headline */}
@@ -84,14 +111,24 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
               <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
                 {listing.headline || t("defaultHeadline")}
               </p>
+              {sellerName && (
+                <p className="flex items-center gap-1 pt-0.5 text-[11px] text-muted-foreground">
+                  <UserRound className="size-3" />
+                  <span className="line-clamp-1">
+                    {t("business:project.publishedBy")} <span className="font-medium text-foreground">{sellerName}</span>
+                  </span>
+                </p>
+              )}
             </div>
 
             {/* Financial Metrics Grid */}
             <div className="mt-4 grid grid-cols-3 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2.5">
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">{t("mrr")}</span>
+                <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                  {showRevenue ? t("business:revenue") : t("mrr")}
+                </span>
                 <p className="font-mono text-xs font-semibold text-foreground">
-                  {formatCompactMoney(mrr, listing.currency, locale)}
+                  {formatCompactMoney(showRevenue ? revenue : mrr, listing.currency, locale)}
                 </p>
               </div>
               <div>

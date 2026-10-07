@@ -1,6 +1,12 @@
 import { apiFetch } from "@/lib/api/client";
 import type { ApiFetcher } from "@/lib/api/fetcher-type";
-import type { OwnedBusiness, OwnedListing, BusinessMetric } from "@/types/domain";
+import type {
+  OwnedBusiness,
+  OwnedListing,
+  BusinessMetric,
+  BusinessImage,
+  BusinessImageKind,
+} from "@/types/domain";
 
 export interface CreateBusinessInput {
   name: string;
@@ -9,11 +15,21 @@ export interface CreateBusinessInput {
   businessModel?: string;
   foundedAt?: string;
   country?: string;
+  city?: string;
   website?: string;
   organizationId?: string;
+  /** Listing fields, so a project can be created complete in one request. */
+  headline?: string;
+  askingPrice?: number;
+  currency?: string;
+  /** Stored by the backend as a REVENUE metric for the current year. */
+  annualRevenue?: number;
 }
 
-export type UpdateBusinessInput = Partial<CreateBusinessInput>;
+/** Price/headline are edited via updateListing and revenue via addMetric. */
+export type UpdateBusinessInput = Partial<
+  Omit<CreateBusinessInput, "headline" | "askingPrice" | "currency" | "annualRevenue">
+>;
 
 export interface UpdateListingInput {
   headline?: string;
@@ -45,7 +61,11 @@ export const businessesApi = {
   updateListing: (id: string, input: UpdateListingInput) =>
     apiFetch<OwnedListing>(`/businesses/${id}/listing`, { method: "PATCH", body: input }),
 
-  /** DRAFT/REJECTED → PENDING_REVIEW. Only an admin can then publish it. */
+  /** DRAFT/REJECTED → PUBLISHED: live on the marketplace immediately. PAUSED → PUBLISHED too. */
+  publish: (id: string) =>
+    apiFetch<OwnedBusiness>(`/businesses/${id}/publish`, { method: "POST" }),
+
+  /** Optional manual-review path: DRAFT/REJECTED → PENDING_REVIEW. */
   submitForReview: (id: string) =>
     apiFetch<OwnedBusiness>(`/businesses/${id}/submit-review`, { method: "POST" }),
 
@@ -63,6 +83,17 @@ export const businessesApi = {
 
   addMetric: (id: string, input: CreateMetricInput) =>
     apiFetch<BusinessMetric>(`/businesses/${id}/metrics`, { method: "POST", body: input }),
+
+  /** JPEG/PNG/WebP up to 5MB. A new LOGO replaces the previous one. */
+  uploadImage: (id: string, file: File, kind: BusinessImageKind) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("kind", kind);
+    return apiFetch<BusinessImage>(`/businesses/${id}/images`, { method: "POST", body: formData });
+  },
+
+  deleteImage: (id: string, imageId: string) =>
+    apiFetch<{ success: boolean }>(`/businesses/${id}/images/${imageId}`, { method: "DELETE" }),
 
   remove: (id: string) => apiFetch<void>(`/businesses/${id}`, { method: "DELETE" }),
 };

@@ -5,7 +5,12 @@ import type { ApiPaginated } from "@/types/api";
 import type { ListingDetail, ListingSummary } from "@/types/domain";
 
 export interface SearchListingsParams {
+  /** Free-text search, matched server-side (name, headline, description, model, city, category). */
+  q?: string;
   categoryId?: string;
+  city?: string;
+  /** Only listings published by this seller. */
+  sellerId?: string;
   minPrice?: number;
   maxPrice?: number;
   minMrr?: number;
@@ -22,6 +27,15 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 function sanitizeParams(params: SearchListingsParams): Record<string, string | number | boolean> {
   const clean: Record<string, string | number | boolean> = {};
 
+  if (params.q && params.q.trim()) {
+    clean.q = params.q.trim().slice(0, 100);
+  }
+  if (params.city && params.city.trim()) {
+    clean.city = params.city.trim().slice(0, 100);
+  }
+  if (params.sellerId && UUID_REGEX.test(params.sellerId)) {
+    clean.sellerId = params.sellerId;
+  }
   if (params.categoryId && UUID_REGEX.test(params.categoryId)) {
     clean.categoryId = params.categoryId;
   }
