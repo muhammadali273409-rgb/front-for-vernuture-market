@@ -23,6 +23,7 @@ import { useConversations } from "@/hooks/use-conversations";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { offerStatusKey, offerStatusVariant, dealStatusKey } from "@/lib/utils/labels";
 import { formatCompactMoney, formatRelativeTime } from "@/lib/utils/format";
+import { countPublishedListings, isPendingOffer, isActiveDeal } from "@/lib/utils/metrics";
 import { useTranslation } from "@/i18n/client";
 import { isSellerRole } from "@/lib/auth/roles";
 
@@ -37,8 +38,9 @@ export default function DashboardPage() {
   const { data: watchlist = [] } = useWatchlist();
 
   const name = user?.profile?.firstName || user?.email?.split("@")[0] || t("common:guest");
-  const pendingOffers = offers.filter((o) => ["SUBMITTED", "COUNTERED", "VIEWED"].includes(o.status));
-  const activeDeals = deals.filter((d) => !["COMPLETED", "CANCELLED"].includes(d.status));
+  const publishedListings = countPublishedListings(businesses);
+  const pendingOffers = offers.filter(isPendingOffer);
+  const activeDeals = deals.filter(isActiveDeal);
   const spotlightDeal = activeDeals[0];
   const spotlightTasks = spotlightDeal?.tasks ?? [];
   const spotlightTasksDone = spotlightTasks.filter((task) => task.status === "COMPLETED").length;

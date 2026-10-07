@@ -7,10 +7,14 @@ import { toast } from "sonner";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
 
+import { useCurrentUser } from "@/hooks/use-current-user";
+
 export function useConversations() {
+  const { data: user } = useCurrentUser();
   return useQuery({
     queryKey: queryKeys.conversations,
     queryFn: () => conversationsApi.list(),
+    enabled: Boolean(user),
     refetchInterval: 15000,
   });
 }
@@ -22,10 +26,11 @@ export function useConversation(id: string) {
 }
 
 export function useMessages(conversationId: string) {
+  const { data: user } = useCurrentUser();
   return useQuery({
     queryKey: queryKeys.messages(conversationId),
     queryFn: () => conversationsApi.messages(conversationId),
-    enabled: Boolean(conversationId),
+    enabled: Boolean(conversationId && user),
     refetchInterval: 5000,
     select: (page) => page.data,
   });

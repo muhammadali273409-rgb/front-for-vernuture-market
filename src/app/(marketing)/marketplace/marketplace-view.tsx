@@ -17,12 +17,16 @@ import { ErrorState } from "@/components/shared/error-state";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { ListingCardSkeleton } from "@/components/marketplace/listing-card-skeleton";
 import { ListingFilters } from "@/components/marketplace/listing-filters";
-import { useInfiniteListings, useCategories } from "@/hooks/use-listings";
+import { useInfiniteListings, useCategories, useListingSearch } from "@/hooks/use-listings";
 import { useUiStore } from "@/stores/ui-store";
 import { useTranslation } from "@/i18n/client";
 import type { SearchListingsParams } from "@/lib/api/listings";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Cap on how many backend pages a single search term walks automatically. */
+const SEARCH_SCAN_PAGES = 5;
+const SEARCH_DEBOUNCE_MS = 350;
 
 function isValidUuid(id?: string | null): boolean {
   return typeof id === "string" && UUID_REGEX.test(id);
@@ -66,8 +70,40 @@ export function MarketplaceView() {
   const searchParams = useSearchParams();
   const filters = paramsFromSearch(searchParams);
   const { marketplaceView, setMarketplaceView } = useUiStore();
-  const [searchTerm, setSearchTerm] = React.useState("");
   const { data: categories = [] } = useCategories();
+
+  // The search term lives in the URL like every other filter, so a result set
+  // is shareable and survives a reload. The input keeps local state while the
+  // user types and only syncs to the URL once typing settles.
+  const urlQuery = searchParams.get("q") ?? "";
+  const searchTerm = urlQuery.trim();
+  const isSearching = searchTerm.length > 0;
+
+  const [searchInput, setSearchInput] = React.useState(urlQuery);
+  const [syncedUrlQuery, setSyncedUrlQuery] = React.useState(urlQuery);
+
+  // Adjust the input during render rather than in an effect, so navigating
+  // (chips, "clear all", browser back) can't leave a stale typed term behind.
+  if (urlQuery !== syncedUrlQuery) {
+    setSyncedUrlQuery(urlQuery);
+    setSearchInput(urlQuery);
+  }
+
+  React.useEffect(() => {
+    if (searchInput === urlQuery) return;
+    const timer = setTimeout(() => {
+      const search = new URLSearchParams(searchParams.toString());
+      const term = searchInput.trim();
+      if (term) search.set("q", term);
+      else search.delete("q");
+      const qs = search.toString();
+      // Already canonical (e.g. the user typed trailing whitespace) — navigating
+      // to the identical URL would re-trigger this effect forever.
+      if (qs === searchParams.toString()) return;
+      router.replace(qs ? `/marketplace?${qs}` : "/marketplace", { scroll: false });
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchInput, urlQuery, searchParams, router]);
 
   // If categoryId in URL is a slug/name, resolve it to backend UUID if possible
   const resolvedCategoryId = React.useMemo(() => {
@@ -90,8 +126,31 @@ export function MarketplaceView() {
     [filters, resolvedCategoryId],
   );
 
+  const browseQuery = useInfiniteListings(queryFilters);
+  // Text search has no backend equivalent, so when a term is active we pull the
+  // widest pages the API allows and match locally.
+  const searchQuery = useListingSearch(queryFilters, isSearching);
+  const activeQuery = isSearching ? searchQuery : browseQuery;
+
   const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useInfiniteListings(queryFilters);
+    activeQuery;
+
+  const scannedPages = searchQuery.data?.pages.length ?? 0;
+  const {
+    hasNextPage: searchHasNextPage,
+    isFetching: searchIsFetching,
+    isFetchingNextPage: searchIsFetchingNextPage,
+    fetchNextPage: fetchSearchNextPage,
+  } = searchQuery;
+  const scanLimitReached = isSearching && scannedPages >= SEARCH_SCAN_PAGES && searchHasNextPage;
+
+  // Keep walking the backend's pages while a term is active, otherwise the term
+  // could only ever match the first page that happened to be loaded.
+  React.useEffect(() => {
+    if (!isSearching || !searchHasNextPage || searchIsFetchingNextPage) return;
+    if (scannedPages >= SEARCH_SCAN_PAGES) return;
+    void fetchSearchNextPage();
+  }, [isSearching, scannedPages, searchHasNextPage, searchIsFetchingNextPage, fetchSearchNextPage]);
 
   const rawListings = React.useMemo(
     () => data?.pages.flatMap((page) => page.data) ?? [],
@@ -113,22 +172,32 @@ export function MarketplaceView() {
   }, [rawListings, activeCategoryFilter, activeCategoryName]);
 
   const listings = React.useMemo(() => {
-    if (!searchTerm) return filteredByCategory;
-    const term = searchTerm.toLowerCase();
-    return filteredByCategory.filter(
-      (l) =>
-        l.name.toLowerCase().includes(term) ||
-        l.headline?.toLowerCase().includes(term) ||
-        l.category?.toLowerCase().includes(term),
-    );
-  }, [filteredByCategory, searchTerm]);
+    if (!isSearching) return filteredByCategory;
+    // Every whitespace-separated token has to match, so "saas analytics"
+    // narrows rather than widens the result set.
+    const tokens = searchTerm.toLowerCase().split(/\s+/).filter(Boolean);
+    return filteredByCategory.filter((l) => {
+      const haystack = [l.name, l.slug, l.headline, l.category, l.country]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return tokens.every((token) => haystack.includes(token));
+    });
+  }, [filteredByCategory, isSearching, searchTerm]);
 
   function updateFilters(next: SearchListingsParams) {
     const search = new URLSearchParams();
     Object.entries(next).forEach(([key, value]) => {
       if (value !== undefined && value !== "") search.set(key, String(value));
     });
+    // The term isn't part of SearchListingsParams, so it has to be carried over.
+    if (searchTerm) search.set("q", searchTerm);
     router.push(`/marketplace?${search.toString()}`);
+  }
+
+  function resetFilters() {
+    setSearchInput("");
+    router.push("/marketplace");
   }
 
   const activeCategory = filters.categoryId ?? "all";
@@ -153,8 +222,8 @@ export function MarketplaceView() {
             <Input
               placeholder={t("searchPlaceholder")}
               className="h-9 pl-8 text-xs"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
 
@@ -195,7 +264,7 @@ export function MarketplaceView() {
                 <ListingFilters
                   values={filters}
                   onChange={updateFilters}
-                  onReset={() => router.push("/marketplace")}
+                  onReset={resetFilters}
                 />
               </div>
             </SheetContent>
@@ -264,7 +333,7 @@ export function MarketplaceView() {
       {/* Main Grid: Sidebar + Listings */}
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block">
-          <ListingFilters values={filters} onChange={updateFilters} onReset={() => router.push("/marketplace")} />
+          <ListingFilters values={filters} onChange={updateFilters} onReset={resetFilters} />
         </aside>
 
         <div>
@@ -282,7 +351,7 @@ export function MarketplaceView() {
               title={t("noMatchTitle")}
               description={t("noMatchDescription")}
               action={
-                <Button variant="outline" size="sm" onClick={() => router.push("/marketplace")}>
+                <Button variant="outline" size="sm" onClick={resetFilters}>
                   {t("clearAllFilters")}
                 </Button>
               }
@@ -301,17 +370,27 @@ export function MarketplaceView() {
                 ))}
               </div>
 
-              {hasNextPage && (
-                <div className="mt-10 flex justify-center">
-                  <Button
-                    variant="outline"
-                    className="h-10 px-6 font-semibold"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                  >
-                    {isFetchingNextPage ? t("loadingMore") : t("loadMoreBusinesses")}
-                  </Button>
-                </div>
+              {isSearching ? (
+                <p className="mt-8 text-center text-xs text-muted-foreground">
+                  {searchIsFetching
+                    ? t("searchScanning")
+                    : scanLimitReached
+                      ? t("searchScanLimitReached")
+                      : t("searchScannedAll", { count: listings.length })}
+                </p>
+              ) : (
+                hasNextPage && (
+                  <div className="mt-10 flex justify-center">
+                    <Button
+                      variant="outline"
+                      className="h-10 px-6 font-semibold"
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                    >
+                      {isFetchingNextPage ? t("loadingMore") : t("loadMoreBusinesses")}
+                    </Button>
+                  </div>
+                )
               )}
             </>
           )}
