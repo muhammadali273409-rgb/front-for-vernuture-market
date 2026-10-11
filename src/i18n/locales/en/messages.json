@@ -21,5 +21,13 @@
   "noConversationsYet": "No conversations yet",
   "noConversationsYetDescription": "Message a seller from a listing to start one.",
   "noMessagesYet": "No messages yet",
-  "writeMessagePlaceholder": "Write a message…"
+  "writeMessagePlaceholder": "Write a message…",
+  "roleBuyer": "Buyer",
+  "roleSeller": "Seller",
+  "unreadCount_one": "{{count}} unread message",
+  "unreadCount_other": "{{count}} unread messages",
+  "backToMessages": "All messages",
+  "conversationUnavailable": "This conversation isn’t available",
+  "viewListing": "View listing",
+  "send": "Send"
 }

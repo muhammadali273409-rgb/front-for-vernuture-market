@@ -151,7 +151,10 @@
     "messageLabel": "Сообщение",
     "messagePlaceholder": "Представьтесь и задайте свой вопрос…",
     "sending": "Отправка…",
-    "sendMessage": "Отправить сообщение"
+    "sendMessage": "Отправить сообщение",
+    "ownListing": "Это ваше объявление.",
+    "buyersOnly": "Связаться с продавцом могут только покупатели.",
+    "addedToConversation": "Сообщение добавлено в вашу переписку с этим продавцом."
   },
   "noBusinessesYet": "Пока нет бизнесов",
   "noBusinessesYetDescription": "Созданные вами бизнесы появятся здесь",

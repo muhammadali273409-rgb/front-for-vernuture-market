@@ -12,6 +12,20 @@ export interface ApiPaginated<T> {
   pagination: ApiPagination;
 }
 
+/** Page-numbered list (GET /listings). */
+export interface ApiPagePagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+}
+
+export interface ApiPagedList<T> {
+  data: T[];
+  pagination: ApiPagePagination;
+}
+
 export interface ApiErrorBody {
   error: {
     code: string;

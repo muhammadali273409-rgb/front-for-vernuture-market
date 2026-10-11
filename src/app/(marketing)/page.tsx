@@ -40,7 +40,7 @@ export default async function HomePage() {
     publicApiFetch as unknown as ApiFetcher,
   );
   const spotlight = featuredListings[0];
-  const spotlightMrr = spotlight ? getMetricValue(spotlight.metrics, "MRR") : null;
+  const spotlightMrr = spotlight ? (spotlight.monthlyRevenue ?? getMetricValue(spotlight.metrics, "MRR")) : null;
   const checklistItems = [1, 2, 3, 4, 5, 6] as const;
 
   return (
@@ -116,6 +116,13 @@ export default async function HomePage() {
                   <p className="font-mono text-base font-bold text-foreground">
                     {formatCompactMoney(spotlightMrr, spotlight.currency, locale)}
                   </p>
+                  {spotlightMrr !== null && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {spotlight.monthlyRevenueVerified
+                        ? t("marketplace:figureVerified")
+                        : t("marketplace:figureSellerReported")}
+                    </span>
+                  )}
                 </div>
                 <Button asChild size="sm" className="font-semibold">
                   <Link href={`/marketplace/${spotlight.slug}`}>

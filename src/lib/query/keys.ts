@@ -1,7 +1,7 @@
 export const queryKeys = {
   me: ["me"] as const,
   listings: (params?: Record<string, unknown>) => ["listings", "flat", params ?? {}] as const,
-  infiniteListings: (params?: Record<string, unknown>) => ["listings", "infinite", params ?? {}] as const,
+  listingFacets: ["listings", "facets"] as const,
   listing: (idOrSlug: string) => ["listing", idOrSlug] as const,
   categories: ["categories"] as const,
   myBusinesses: ["businesses", "mine"] as const,
@@ -11,6 +11,7 @@ export const queryKeys = {
   watchlist: ["watchlist"] as const,
   savedSearches: ["saved-searches"] as const,
   conversations: ["conversations"] as const,
+  conversation: (id: string) => ["conversation", id] as const,
   messages: (conversationId: string) => ["conversation", conversationId, "messages"] as const,
   notifications: ["notifications"] as const,
   subscription: ["subscription"] as const,

@@ -60,12 +60,16 @@ export default async function BusinessDetailPage({ params }: PageProps) {
   const t = await getT("marketplace");
   const locale = await getServerLocale();
 
-  const mrr = getMetricValue(listing.metrics, "MRR");
+  // Latest disclosed monthly figures (null = not disclosed). Revenue and
+  // profit are separate metrics; nothing here is estimated.
+  const monthlyRevenue = listing.monthlyRevenue ?? null;
+  const monthlyProfit = listing.monthlyProfit ?? null;
   const arr = getMetricValue(listing.metrics, "ARR");
   const growth = getMetricValue(listing.metrics, "GROWTH");
-  const netMargin = mrr && getMetricValue(listing.metrics, "PROFIT")
-    ? Math.round((getMetricValue(listing.metrics, "PROFIT")! / mrr) * 100)
-    : null;
+  const netMargin =
+    monthlyRevenue && monthlyProfit !== null ? Math.round((monthlyProfit / monthlyRevenue) * 100) : null;
+  const sourceLabel = (verified: boolean | undefined) =>
+    verified ? t("figureVerified") : t("figureSellerReported");
   const trustScore = verificationScore(listing.verifications);
   const multiple = listing.askingPrice && arr ? (listing.askingPrice / arr).toFixed(1) : null;
 
@@ -143,16 +147,26 @@ export default async function BusinessDetailPage({ params }: PageProps) {
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 gap-3 pt-2 sm:grid-cols-4">
             <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-              <span className="text-[10px] font-medium uppercase text-muted-foreground">{t("verifiedMrr")}</span>
+              <span className="text-[10px] font-medium uppercase text-muted-foreground">{t("monthlyRevenue")}</span>
               <p className="font-mono text-sm font-bold text-foreground">
-                {formatCompactMoney(mrr, listing.currency, locale)}
+                {monthlyRevenue !== null
+                  ? formatCompactMoney(monthlyRevenue, listing.currency, locale)
+                  : t("notDisclosed")}
               </p>
+              {monthlyRevenue !== null && (
+                <span className="text-[10px] text-muted-foreground">{sourceLabel(listing.monthlyRevenueVerified)}</span>
+              )}
             </div>
             <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
-              <span className="text-[10px] font-medium uppercase text-muted-foreground">{t("runRateArr")}</span>
+              <span className="text-[10px] font-medium uppercase text-muted-foreground">{t("monthlyProfit")}</span>
               <p className="font-mono text-sm font-bold text-foreground">
-                {formatCompactMoney(arr, listing.currency, locale)}
+                {monthlyProfit !== null
+                  ? formatCompactMoney(monthlyProfit, listing.currency, locale)
+                  : t("notDisclosed")}
               </p>
+              {monthlyProfit !== null && (
+                <span className="text-[10px] text-muted-foreground">{sourceLabel(listing.monthlyProfitVerified)}</span>
+              )}
             </div>
             <div className="rounded-lg border border-border/60 bg-muted/20 p-2.5">
               <span className="text-[10px] font-medium uppercase text-muted-foreground">{t("annualGrowth")}</span>
@@ -182,7 +196,7 @@ export default async function BusinessDetailPage({ params }: PageProps) {
             </div>
             {multiple && (
               <span className="font-mono text-xs text-muted-foreground">
-                {t("multipleReconciled", { multiple })}
+                {t("arrMultiple", { multiple })}
               </span>
             )}
           </div>
@@ -190,7 +204,7 @@ export default async function BusinessDetailPage({ params }: PageProps) {
           <div className="flex w-full flex-col gap-2">
             <MakeOfferDialog businessId={listing.id} currency={listing.currency} />
             <div className="flex gap-2">
-              <ContactSellerButton businessId={listing.id} ownerId={listing.ownerId} />
+              <ContactSellerButton businessId={listing.id} sellerId={listing.ownerId} />
               <WatchlistButton businessId={listing.id} />
             </div>
             <Button asChild variant="outline" size="sm" className="h-8 gap-1 text-xs">
@@ -294,6 +308,14 @@ export default async function BusinessDetailPage({ params }: PageProps) {
                       )}
                     </div>
                   </div>
+                  {seller && (
+                    <div className="flex flex-wrap gap-2">
+                      <Button asChild variant="outline" size="sm" className="h-8 text-xs">
+                        <Link href={`/sellers/${seller.id}`}>{t("viewSeller")}</Link>
+                      </Button>
+                      <ContactSellerButton businessId={listing.id} sellerId={listing.ownerId} size="sm" />
+                    </div>
+                  )}
                 </Card>
 
                 <Card className="border border-border/80 bg-card p-5 space-y-4 text-xs">

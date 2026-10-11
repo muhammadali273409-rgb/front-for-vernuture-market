@@ -11,5 +11,6 @@
   "valueMustBeZeroOrGreater": "Значение должно быть не меньше нуля",
   "periodRequired": "Период обязателен",
   "amountGreaterThanZero": "Введите сумму больше нуля",
-  "messageRequired": "Сообщение не может быть пустым"
+  "messageRequired": "Сообщение не может быть пустым",
+  "messageTooLong": "Сообщение слишком длинное (максимум 5000 символов)"
 }

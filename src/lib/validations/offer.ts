@@ -11,7 +11,10 @@ export type OfferValues = {
   terms?: string;
 };
 
+export const MESSAGE_MAX_LENGTH = 5000;
+
 export const messageSchema = z.object({
-  body: z.string().min(1, "validation:messageRequired").max(8000),
+  // Mirrors the backend (MESSAGE_MAX_LENGTH): trimmed, 1–5000 characters.
+  body: z.string().trim().min(1, "validation:messageRequired").max(MESSAGE_MAX_LENGTH, "validation:messageTooLong"),
 });
 export type MessageValues = z.infer<typeof messageSchema>;

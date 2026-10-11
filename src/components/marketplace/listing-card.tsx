@@ -3,12 +3,12 @@
 /* eslint-disable @next/next/no-img-element -- images are short-lived signed URLs from the private bucket */
 
 import Link from "next/link";
-import { TrendingUp, Scale, Heart, Briefcase, UserRound } from "lucide-react";
+import { Scale, Heart, Briefcase, UserRound, ShieldCheck, CalendarDays } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatCompactMoney } from "@/lib/utils/format";
-import { getMetricValue } from "@/lib/utils/metrics";
+import { formatCompactMoney, formatDate } from "@/lib/utils/format";
+import { categoryLabel } from "@/lib/marketplace/categories";
 import { useUiStore } from "@/stores/ui-store";
 import { useToggleWatchlist, useWatchlist } from "@/hooks/use-watchlist";
 import { useTranslation } from "@/i18n/client";
@@ -18,10 +18,9 @@ import { cn } from "@/lib/utils";
 
 interface ListingCardProps {
   listing: ListingSummary;
-  compact?: boolean;
 }
 
-export function ListingCard({ listing, compact = false }: ListingCardProps) {
+export function ListingCard({ listing }: ListingCardProps) {
   const { t, i18n } = useTranslation("marketplace");
   const locale = i18n.language as Locale;
   const { comparisonList, addToComparison, removeFromComparison } = useUiStore();
@@ -31,16 +30,14 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
   const isCompared = comparisonList.some((item) => item.id === listing.id);
   const isWatching = watchlist.some((w) => w.businessId === listing.id);
 
-  const mrr = getMetricValue(listing.metrics, "MRR");
-  const arr = getMetricValue(listing.metrics, "ARR");
-  const growth = getMetricValue(listing.metrics, "GROWTH");
-  const profit = getMetricValue(listing.metrics, "PROFIT");
-  // Non-subscription businesses report annual revenue instead of MRR.
-  const revenue = getMetricValue(listing.metrics, "REVENUE");
-  const showRevenue = mrr === null && revenue !== null;
   const location = [listing.city, listing.country].filter(Boolean).join(", ");
   const sellerName = listing.seller?.company || listing.seller?.name;
-  const multiple = listing.askingPrice && arr ? (listing.askingPrice / arr).toFixed(1) : null;
+  const summary = listing.headline || listing.excerpt;
+  const category =
+    listing.category &&
+    (listing.categorySlug
+      ? categoryLabel(t, { name: listing.category, slug: listing.categorySlug })
+      : listing.category);
 
   function handleCompareClick(e: React.MouseEvent) {
     e.preventDefault();
@@ -86,31 +83,38 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
                 <img src={listing.logoUrl} alt="" loading="lazy" className="size-full object-cover" />
               </div>
             )}
+            {listing.verified && (
+              <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full border border-emerald-500/30 bg-card/90 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 backdrop-blur dark:text-emerald-400">
+                <ShieldCheck className="size-3" />
+                {t("verifiedBusiness")}
+              </span>
+            )}
           </div>
 
           <CardContent className="flex flex-1 flex-col p-5">
-            {/* Top metadata row */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5">
-                {listing.category && (
-                  <Badge variant="secondary" className="px-2 py-0.5 text-[11px] font-medium tracking-tight">
-                    {listing.category}
-                  </Badge>
-                )}
-                <span className="rounded-sm border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground uppercase">
-                  {location || t("global")}
+            <div className="flex flex-wrap items-center gap-1.5">
+              {category && (
+                <Badge variant="secondary" className="px-2 py-0.5 text-[11px] font-medium tracking-tight">
+                  {category}
+                </Badge>
+              )}
+              {listing.businessModel && (
+                <span className="rounded-sm border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  {listing.businessModel}
                 </span>
-              </div>
+              )}
+              {location && (
+                <span className="rounded-sm border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] uppercase text-muted-foreground">
+                  {location}
+                </span>
+              )}
             </div>
 
-            {/* Title & Headline */}
             <div className="mt-3.5 space-y-1">
-              <h3 className="line-clamp-1 font-semibold text-foreground group-hover:text-primary transition-colors">
+              <h3 className="line-clamp-1 font-semibold text-foreground transition-colors group-hover:text-primary">
                 {listing.name}
               </h3>
-              <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                {listing.headline || t("defaultHeadline")}
-              </p>
+              {summary && <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{summary}</p>}
               {sellerName && (
                 <p className="flex items-center gap-1 pt-0.5 text-[11px] text-muted-foreground">
                   <UserRound className="size-3" />
@@ -121,63 +125,42 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
               )}
             </div>
 
-            {/* Financial Metrics Grid */}
-            <div className="mt-4 grid grid-cols-3 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2.5">
-              <div>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">
-                  {showRevenue ? t("business:revenue") : t("mrr")}
-                </span>
-                <p className="font-mono text-xs font-semibold text-foreground">
-                  {formatCompactMoney(showRevenue ? revenue : mrr, listing.currency, locale)}
-                </p>
-              </div>
-              <div>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">{t("arr")}</span>
-                <p className="font-mono text-xs font-semibold text-foreground">
-                  {formatCompactMoney(arr, listing.currency, locale)}
-                </p>
-              </div>
-              <div>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">{t("growth")}</span>
-                {growth !== null ? (
-                  <p className="flex items-center gap-0.5 font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                    <TrendingUp className="size-3" />
-                    +{growth}%
-                  </p>
-                ) : (
-                  <p className="font-mono text-xs font-semibold text-muted-foreground">{t("notDisclosed")}</p>
-                )}
-              </div>
+            {/* Monthly figures exactly as disclosed — revenue and profit are never interchanged */}
+            <div className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border/60 bg-muted/20 p-2.5">
+              <MonthlyFigure
+                label={t("monthlyRevenue")}
+                value={listing.monthlyRevenue ?? null}
+                verified={listing.monthlyRevenueVerified ?? false}
+                currency={listing.currency}
+                locale={locale}
+              />
+              <MonthlyFigure
+                label={t("monthlyProfit")}
+                value={listing.monthlyProfit ?? null}
+                verified={listing.monthlyProfitVerified ?? false}
+                currency={listing.currency}
+                locale={locale}
+              />
             </div>
 
-            {/* Asking Price & Multiples footer */}
-            <div className="mt-4 flex items-baseline justify-between border-t border-border/40 pt-3">
+            <div className="mt-auto flex items-end justify-between gap-2 border-t border-border/40 pt-3">
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">{t("business:askingPrice")}</span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-mono text-lg font-bold text-foreground">
-                    {formatCompactMoney(listing.askingPrice, listing.currency, locale)}
-                  </span>
-                  {multiple && (
-                    <span className="text-[11px] font-medium text-muted-foreground">
-                      {multiple}{t("xArrSuffix")}
-                    </span>
-                  )}
-                </div>
+                <span className="text-[10px] font-medium uppercase text-muted-foreground">{t("business:askingPrice")}</span>
+                <p className="font-mono text-lg font-bold text-foreground">
+                  {listing.askingPrice !== null
+                    ? formatCompactMoney(listing.askingPrice, listing.currency, locale)
+                    : t("notDisclosed")}
+                </p>
               </div>
-
-              {profit !== null && mrr && (
-                <div className="text-right">
-                  <span className="text-[10px] font-medium text-muted-foreground uppercase">{t("netMargin")}</span>
-                  <p className="font-mono text-xs font-semibold text-foreground">
-                    {Math.round((profit / mrr) * 100)}%
-                  </p>
-                </div>
+              {listing.publishedAt && (
+                <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <CalendarDays className="size-3" />
+                  {t("listedOn", { date: formatDate(listing.publishedAt, locale) })}
+                </span>
               )}
             </div>
           </CardContent>
 
-          {/* Card Action Strip */}
           <CardFooter className="flex items-center justify-end border-t border-border/60 bg-muted/10 px-5 py-2.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <Button
@@ -200,6 +183,7 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
                 className={cn("size-7", isWatching && "text-rose-500 hover:text-rose-600")}
                 onClick={handleWatchlistClick}
                 title={isWatching ? t("savedInWatchlist") : t("saveToWatchlist")}
+                aria-label={isWatching ? t("savedInWatchlist") : t("saveToWatchlist")}
               >
                 <Heart className={cn("size-3.5", isWatching && "fill-current")} />
               </Button>
@@ -207,6 +191,42 @@ export function ListingCard({ listing, compact = false }: ListingCardProps) {
           </CardFooter>
         </Card>
       </Link>
+    </div>
+  );
+}
+
+function MonthlyFigure({
+  label,
+  value,
+  verified,
+  currency,
+  locale,
+}: {
+  label: string;
+  value: number | null;
+  verified: boolean;
+  currency: string;
+  locale: Locale;
+}) {
+  const { t } = useTranslation("marketplace");
+  return (
+    <div className="min-w-0">
+      <span className="block truncate text-[10px] font-medium uppercase text-muted-foreground">{label}</span>
+      {value === null ? (
+        <p className="font-mono text-xs font-semibold text-muted-foreground">{t("notDisclosed")}</p>
+      ) : (
+        <>
+          <p className="font-mono text-xs font-semibold text-foreground">{formatCompactMoney(value, currency, locale)}</p>
+          <span
+            className={cn(
+              "text-[10px]",
+              verified ? "font-medium text-emerald-700 dark:text-emerald-400" : "text-muted-foreground",
+            )}
+          >
+            {verified ? t("figureVerified") : t("figureSellerReported")}
+          </span>
+        </>
+      )}
     </div>
   );
 }

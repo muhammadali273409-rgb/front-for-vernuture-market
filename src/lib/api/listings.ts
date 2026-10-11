@@ -1,85 +1,52 @@
 import { apiFetch } from "@/lib/api/client";
 import type { ApiFetcher } from "@/lib/api/fetcher-type";
 import { buildQueryString } from "@/lib/api/query-string";
-import type { ApiPaginated } from "@/types/api";
-import type { ListingDetail, ListingSummary } from "@/types/domain";
+import type { ApiPagedList } from "@/types/api";
+import type { ListingDetail, ListingFacets, ListingSummary, PublicSeller } from "@/types/domain";
 
+/**
+ * GET /listings query. All filtering, sorting and paging happens on the
+ * backend. Build marketplace queries with `toApiParams` from
+ * `@/lib/marketplace/filters`, which validates them first.
+ */
 export interface SearchListingsParams {
   /** Free-text search, matched server-side (name, headline, description, model, city, category). */
   q?: string;
+  /** Category slug. */
+  category?: string;
   categoryId?: string;
+  businessModel?: string;
   city?: string;
   /** Only listings published by this seller. */
   sellerId?: string;
   minPrice?: number;
   maxPrice?: number;
-  minMrr?: number;
-  verified?: boolean;
+  /** Monthly revenue (latest MRR). */
+  minRevenue?: number;
+  maxRevenue?: number;
+  /** Monthly profit (latest PROFIT). */
+  minProfit?: number;
+  maxProfit?: number;
+  verified?: "true";
   country?: string;
-  sortBy?: "createdAt" | "price" | "mrr";
+  sortBy?: "createdAt" | "price" | "revenue" | "profit";
   sortDir?: "asc" | "desc";
-  cursor?: string;
+  page?: number;
   limit?: number;
 }
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function sanitizeParams(params: SearchListingsParams): Record<string, string | number | boolean> {
-  const clean: Record<string, string | number | boolean> = {};
-
-  if (params.q && params.q.trim()) {
-    clean.q = params.q.trim().slice(0, 100);
-  }
-  if (params.city && params.city.trim()) {
-    clean.city = params.city.trim().slice(0, 100);
-  }
-  if (params.sellerId && UUID_REGEX.test(params.sellerId)) {
-    clean.sellerId = params.sellerId;
-  }
-  if (params.categoryId && UUID_REGEX.test(params.categoryId)) {
-    clean.categoryId = params.categoryId;
-  }
-  if (typeof params.minPrice === "number" && !isNaN(params.minPrice) && params.minPrice >= 0) {
-    clean.minPrice = params.minPrice;
-  }
-  if (typeof params.maxPrice === "number" && !isNaN(params.maxPrice) && params.maxPrice >= 0) {
-    clean.maxPrice = params.maxPrice;
-  }
-  if (typeof params.minMrr === "number" && !isNaN(params.minMrr) && params.minMrr >= 0) {
-    clean.minMrr = params.minMrr;
-  }
-  if (typeof params.verified === "boolean") {
-    clean.verified = params.verified;
-  }
-  if (params.country && typeof params.country === "string" && params.country.trim()) {
-    clean.country = params.country.trim().toUpperCase();
-  }
-  if (params.sortBy) {
-    const sort = (params.sortBy as string) === "askingPrice" ? "price" : params.sortBy;
-    if (["createdAt", "price", "mrr"].includes(sort)) {
-      clean.sortBy = sort;
-    }
-  }
-  if (params.sortDir && ["asc", "desc"].includes(params.sortDir)) {
-    clean.sortDir = params.sortDir;
-  }
-  if (params.cursor) {
-    clean.cursor = params.cursor;
-  }
-  if (typeof params.limit === "number" && !isNaN(params.limit) && params.limit > 0) {
-    clean.limit = params.limit;
-  }
-
-  return clean;
-}
-
 export const listingsApi = {
-  search: (params: SearchListingsParams, fetcher: ApiFetcher = apiFetch) =>
-    fetcher<ApiPaginated<ListingSummary>>(
-      `/listings${buildQueryString(sanitizeParams(params))}`,
+  search: (params: SearchListingsParams, fetcher: ApiFetcher = apiFetch, signal?: AbortSignal) =>
+    fetcher<ApiPagedList<ListingSummary>>(
+      `/listings${buildQueryString(params as Record<string, string | number | undefined>)}`,
+      signal ? { signal } : undefined,
     ),
 
-  getOne: (idOrSlug: string, fetcher: ApiFetcher = apiFetch) =>
-    fetcher<ListingDetail>(`/listings/${idOrSlug}`),
-};
+  facets: (fetcher: ApiFetcher = apiFetch) => fetcher<ListingFacets>("/listings/facets"),
 
+  getOne: (idOrSlug: string, fetcher: ApiFetcher = apiFetch) =>
+    fetcher<ListingDetail>(`/listings/${encodeURIComponent(idOrSlug)}`),
+
+  seller: (id: string, fetcher: ApiFetcher = apiFetch) =>
+    fetcher<PublicSeller>(`/sellers/${encodeURIComponent(id)}`),
+};

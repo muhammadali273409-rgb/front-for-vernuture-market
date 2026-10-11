@@ -21,5 +21,13 @@
   "noConversationsYet": "То ҳол гуфтугӯ нест",
   "noConversationsYetDescription": "Ба фурӯшанда аз эълон паём фиристед, то гуфтугӯро сар кунед.",
   "noMessagesYet": "То ҳол паём нест",
-  "writeMessagePlaceholder": "Паём нависед…"
+  "writeMessagePlaceholder": "Паём нависед…",
+  "roleBuyer": "Харидор",
+  "roleSeller": "Фурӯшанда",
+  "unreadCount_one": "{{count}} паёми нохонда",
+  "unreadCount_other": "{{count}} паёми нохонда",
+  "backToMessages": "Ҳамаи паёмҳо",
+  "conversationUnavailable": "Ин мукотиба дастрас нест",
+  "viewListing": "Дидани эълон",
+  "send": "Фиристодан"
 }

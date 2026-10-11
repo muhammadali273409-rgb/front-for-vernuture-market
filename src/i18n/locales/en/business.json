@@ -151,7 +151,10 @@
     "messageLabel": "Message",
     "messagePlaceholder": "Introduce yourself and ask your question…",
     "sending": "Sending…",
-    "sendMessage": "Send message"
+    "sendMessage": "Send message",
+    "ownListing": "This is your listing.",
+    "buyersOnly": "Only buyer accounts can contact sellers.",
+    "addedToConversation": "Added to your existing conversation with this seller."
   },
   "noBusinessesYet": "No businesses yet",
   "noBusinessesYetDescription": "Businesses you create will show up here",

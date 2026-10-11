@@ -21,5 +21,15 @@
   "noConversationsYet": "Пока нет переписок",
   "noConversationsYetDescription": "Напишите продавцу с объявления, чтобы начать переписку.",
   "noMessagesYet": "Пока нет сообщений",
-  "writeMessagePlaceholder": "Напишите сообщение…"
+  "writeMessagePlaceholder": "Напишите сообщение…",
+  "roleBuyer": "Покупатель",
+  "roleSeller": "Продавец",
+  "unreadCount_one": "{{count}} непрочитанное сообщение",
+  "unreadCount_few": "{{count}} непрочитанных сообщения",
+  "unreadCount_many": "{{count}} непрочитанных сообщений",
+  "unreadCount_other": "{{count}} непрочитанных сообщения",
+  "backToMessages": "Все сообщения",
+  "conversationUnavailable": "Эта переписка недоступна",
+  "viewListing": "Открыть объявление",
+  "send": "Отправить"
 }

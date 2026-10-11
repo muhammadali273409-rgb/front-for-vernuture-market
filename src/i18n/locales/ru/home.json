@@ -12,7 +12,7 @@
       "trustScore": "Индекс доверия 98%",
       "subtitle": "ARR подтверждён через Stripe · Мультипликатор 2.9x · Комната данных с NDA активна",
       "askingPriceLabel": "Запрашиваемая цена",
-      "verifiedMrrLabel": "Подтверждённый MRR",
+      "verifiedMrrLabel": "Выручка в месяц (MRR)",
       "verifiedMrrChange": "+34% за год",
       "grossMarginLabel": "Валовая маржа",
       "grossMarginNote": "Инфраструктура на bare-metal",

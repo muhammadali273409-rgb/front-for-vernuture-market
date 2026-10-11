@@ -103,14 +103,19 @@ export default function ComparePage() {
                 ))}
               </tr>
 
-              {/* Verified MRR */}
+              {/* Monthly revenue (latest MRR) — labelled by source, never assumed verified */}
               <tr>
-                <td className="p-3 font-semibold text-muted-foreground">{t("verifiedMrr")}</td>
+                <td className="p-3 font-semibold text-muted-foreground">{t("monthlyRevenue")}</td>
                 {selectedBusinesses.map((b) => {
-                  const mrr = getMetricValue(b.metrics, "MRR");
+                  const mrr = b.monthlyRevenue !== undefined ? b.monthlyRevenue : getMetricValue(b.metrics, "MRR");
                   return (
                     <td key={b.id} className="p-3 font-mono font-medium text-foreground">
                       {mrr !== null ? `${formatCompactMoney(mrr, b.currency, locale)}${t("perMonth")}` : t("notDisclosed")}
+                      {mrr !== null && (
+                        <span className="block font-sans text-[10px] font-normal text-muted-foreground">
+                          {b.monthlyRevenueVerified ? t("figureVerified") : t("figureSellerReported")}
+                        </span>
+                      )}
                     </td>
                   );
                 })}
@@ -118,7 +123,7 @@ export default function ComparePage() {
 
               {/* Run-rate ARR */}
               <tr>
-                <td className="p-3 font-semibold text-muted-foreground">{t("runRateArr")}</td>
+                <td className="p-3 font-semibold text-muted-foreground">{t("arr")}</td>
                 {selectedBusinesses.map((b) => {
                   const arr = getMetricValue(b.metrics, "ARR");
                   return (
@@ -160,7 +165,7 @@ export default function ComparePage() {
               <tr>
                 <td className="p-3 font-semibold text-muted-foreground">{t("monthlyNetProfit")}</td>
                 {selectedBusinesses.map((b) => {
-                  const profit = getMetricValue(b.metrics, "PROFIT");
+                  const profit = b.monthlyProfit !== undefined ? b.monthlyProfit : getMetricValue(b.metrics, "PROFIT");
                   return (
                     <td key={b.id} className="p-3 font-mono font-medium text-foreground">
                       {profit !== null ? `${formatCompactMoney(profit, b.currency, locale)}${t("perMonth")}` : t("notDisclosed")}

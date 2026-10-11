@@ -151,13 +151,27 @@ export interface ListingSummary {
   slug: string;
   name: string;
   headline: string | null;
+  /** First ~220 characters of the public description. */
+  excerpt?: string | null;
   category: string | null;
   categoryId?: string | null;
+  categorySlug?: string | null;
   country: string | null;
   city?: string | null;
   businessModel?: string | null;
   askingPrice: number | null;
   currency: string;
+  /**
+   * Latest seller-disclosed monthly revenue (MRR) / monthly profit, in major
+   * units. null = not disclosed — never estimated, never derived from annual
+   * revenue. The *Verified flags are true only for figures that were verified.
+   */
+  monthlyRevenue?: number | null;
+  monthlyRevenueVerified?: boolean;
+  monthlyProfit?: number | null;
+  monthlyProfitVerified?: boolean;
+  /** At least one of the business's verifications is VERIFIED. */
+  verified?: boolean;
   publishedAt: string | null;
   logoUrl?: string | null;
   coverUrl?: string | null;
@@ -165,6 +179,15 @@ export interface ListingSummary {
   seller?: ListingSeller;
   /** Verified financial metrics disclosed by the seller, if any — never a client-side estimate. */
   metrics?: BusinessMetric[];
+}
+
+/** GET /sellers/:id — only what listings already show about a seller. */
+export interface PublicSeller extends ListingSeller {
+  publicListings: number;
+}
+
+export interface ListingFacets {
+  businessModels: { value: string; count: number }[];
 }
 
 export interface ListingDetail extends ListingSummary {
@@ -271,9 +294,18 @@ export interface Conversation {
   id: string;
   businessId: string | null;
   business?: { id: string; name: string; slug: string } | null;
+  /** The buyer of a listing enquiry thread (null for deal/negotiation threads). */
+  buyerId?: string | null;
+  /** The business owner, for threads about a business. */
+  sellerId?: string | null;
   participants: ConversationParticipant[];
   /** The service includes only the single most recent message per conversation in list views. */
   messages?: Message[];
+  lastMessage?: Message | null;
+  /** Messages from the other side newer than this user's last read. */
+  unreadCount?: number;
+  /** Only on start responses: false when an existing thread was reused. */
+  created?: boolean;
   createdAt: string;
   updatedAt: string;
 }

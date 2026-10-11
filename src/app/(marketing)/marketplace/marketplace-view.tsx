@@ -1,349 +1,362 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
-  SlidersHorizontal,
-  Store,
-  Search,
+  ChevronLeft,
+  ChevronRight,
   LayoutGrid,
   List,
+  Loader2,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Store,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorState } from "@/components/shared/error-state";
 import { ListingCard } from "@/components/marketplace/listing-card";
 import { ListingCardSkeleton } from "@/components/marketplace/listing-card-skeleton";
 import { ListingFilters } from "@/components/marketplace/listing-filters";
-import { useInfiniteListings, useCategories } from "@/hooks/use-listings";
+import { useCategories, useListings } from "@/hooks/use-listings";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUiStore } from "@/stores/ui-store";
 import { useTranslation } from "@/i18n/client";
-import type { SearchListingsParams } from "@/lib/api/listings";
-
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import type { Locale } from "@/i18n/settings";
+import { isSellerRole } from "@/lib/auth/roles";
+import { formatCompactMoney } from "@/lib/utils/format";
+import { cn } from "@/lib/utils";
+import { categoryLabel, orderCategories } from "@/lib/marketplace/categories";
+import {
+  RANGE_FIELDS,
+  clearFilters,
+  countActiveFilters,
+  hasAnyCriteria,
+  parseFilters,
+  rangeKeys,
+  serializeFilters,
+  toApiParams,
+  updateFilters,
+  type MarketplaceFilters,
+} from "@/lib/marketplace/filters";
 
 const SEARCH_DEBOUNCE_MS = 350;
 
-function isValidUuid(id?: string | null): boolean {
-  return typeof id === "string" && UUID_REGEX.test(id);
-}
-
-function paramsFromSearch(searchParams: URLSearchParams): SearchListingsParams {
-  const sortBy = searchParams.get("sortBy");
-  const normalizedSortBy =
-    sortBy === "askingPrice" || sortBy === "price"
-      ? "price"
-      : sortBy === "mrr"
-        ? "mrr"
-        : sortBy === "createdAt"
-          ? "createdAt"
-          : undefined;
-
-  return {
-    categoryId: searchParams.get("categoryId") ?? undefined,
-    minPrice: searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined,
-    maxPrice: searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined,
-    minMrr: searchParams.get("minMrr") ? Number(searchParams.get("minMrr")) : undefined,
-    verified: searchParams.get("verified") === "true" ? true : undefined,
-    country: searchParams.get("country") ?? undefined,
-    sortBy: normalizedSortBy,
-    sortDir: (searchParams.get("sortDir") as SearchListingsParams["sortDir"]) ?? undefined,
-  };
-}
-
-const STATIC_QUICK_CATEGORIES = [
-  { id: "all", key: "all" },
-  { id: "SaaS", key: "saasAi" },
-  { id: "Developer Tools", key: "devTools" },
-  { id: "FinTech", key: "fintech" },
-  { id: "E-Commerce", key: "ecommerce" },
-  { id: "Media", key: "media" },
-] as const;
+const chipClass = (selected: boolean) =>
+  cn(
+    "shrink-0 rounded-md border px-3 py-1 text-xs font-medium transition-all",
+    selected
+      ? "border-primary bg-primary/10 font-semibold text-primary"
+      : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground",
+  );
 
 export function MarketplaceView() {
-  const { t } = useTranslation("marketplace");
+  const { t, i18n } = useTranslation("marketplace");
+  const locale = i18n.language as Locale;
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const filters = paramsFromSearch(searchParams);
+  const rawQuery = searchParams.toString();
   const { marketplaceView, setMarketplaceView } = useUiStore();
-  const { data: categories = [] } = useCategories();
+  const { data: user } = useCurrentUser();
+  const [filtersOpen, setFiltersOpen] = React.useState(false);
 
-  // The search term lives in the URL like every other filter, so a result set
-  // is shareable and survives a reload. The input keeps local state while the
-  // user types and only syncs to the URL once typing settles.
-  const urlQuery = searchParams.get("q") ?? "";
-  const searchTerm = urlQuery.trim();
+  // The URL is the single source of truth for what's shown — shareable and
+  // refresh-proof. Everything in it is validated before reaching the API.
+  const filters = React.useMemo(() => parseFilters(new URLSearchParams(rawQuery)), [rawQuery]);
 
-  const [searchInput, setSearchInput] = React.useState(urlQuery);
-  const [syncedUrlQuery, setSyncedUrlQuery] = React.useState(urlQuery);
+  const categoriesQuery = useCategories();
+  const categories = React.useMemo(() => orderCategories(categoriesQuery.data ?? []), [categoriesQuery.data]);
 
-  // Adjust the input during render rather than in an effect, so navigating
-  // (chips, "clear all", browser back) can't leave a stale typed term behind.
-  if (urlQuery !== syncedUrlQuery) {
-    setSyncedUrlQuery(urlQuery);
-    setSearchInput(urlQuery);
-  }
+  const apiParams = React.useMemo(() => toApiParams(filters), [filters]);
+  const listingsQuery = useListings(apiParams);
+  const listings = listingsQuery.data?.data ?? [];
+  const pagination = listingsQuery.data?.pagination;
 
+  const navigate = React.useCallback(
+    (next: MarketplaceFilters, { replace = false } = {}) => {
+      const qs = serializeFilters(next);
+      const href = qs ? `${pathname}?${qs}` : pathname;
+      if (replace) router.replace(href, { scroll: false });
+      else router.push(href, { scroll: false });
+    },
+    [pathname, router],
+  );
+
+  const change = React.useCallback(
+    (patch: Partial<MarketplaceFilters>) => navigate(updateFilters(filters, patch)),
+    [filters, navigate],
+  );
+
+  // Normalise junk, legacy or out-of-range params in place (no history entry),
+  // including old category-UUID links, which become readable slugs.
   React.useEffect(() => {
-    if (searchInput === urlQuery) return;
-    const timer = setTimeout(() => {
-      const search = new URLSearchParams(searchParams.toString());
-      const term = searchInput.trim();
-      if (term) search.set("q", term);
-      else search.delete("q");
-      const qs = search.toString();
-      // Already canonical (e.g. the user typed trailing whitespace) — navigating
-      // to the identical URL would re-trigger this effect forever.
-      if (qs === searchParams.toString()) return;
-      router.replace(qs ? `/marketplace?${qs}` : "/marketplace", { scroll: false });
-    }, SEARCH_DEBOUNCE_MS);
+    let canonical = filters;
+    const legacyCategory = filters.categoryId && categories.find((c) => c.id === filters.categoryId);
+    if (legacyCategory) {
+      canonical = { ...filters, category: legacyCategory.slug };
+      delete canonical.categoryId;
+    }
+    if (serializeFilters(canonical) !== rawQuery) navigate(canonical, { replace: true });
+  }, [filters, categories, rawQuery, navigate]);
+
+  // Search input: local while typing, synced to the URL once typing settles.
+  const [searchInput, setSearchInput] = React.useState(filters.q ?? "");
+  const [syncedQ, setSyncedQ] = React.useState(filters.q ?? "");
+  if ((filters.q ?? "") !== syncedQ) {
+    setSyncedQ(filters.q ?? "");
+    setSearchInput(filters.q ?? "");
+  }
+  React.useEffect(() => {
+    const term = searchInput.trim();
+    if (term === (filters.q ?? "")) return;
+    const timer = setTimeout(
+      () => navigate(updateFilters(filters, { q: term || undefined }), { replace: true }),
+      SEARCH_DEBOUNCE_MS,
+    );
     return () => clearTimeout(timer);
-  }, [searchInput, urlQuery, searchParams, router]);
+  }, [searchInput, filters, navigate]);
 
-  // If categoryId in URL is a slug/name, resolve it to backend UUID if possible
-  const resolvedCategoryId = React.useMemo(() => {
-    if (!filters.categoryId || filters.categoryId === "all") return undefined;
-    if (isValidUuid(filters.categoryId)) return filters.categoryId;
-    const found = categories.find(
-      (c) =>
-        c.id === filters.categoryId ||
-        c.name.toLowerCase() === filters.categoryId?.toLowerCase() ||
-        c.slug.toLowerCase() === filters.categoryId?.toLowerCase(),
-    );
-    return found ? found.id : filters.categoryId;
-  }, [filters.categoryId, categories]);
-
-  // The search term is matched server-side (GET /listings?q=…), so it pages
-  // and sorts together with every other filter.
-  const queryFilters = React.useMemo(
-    () => ({
-      ...filters,
-      categoryId: resolvedCategoryId,
-      q: searchTerm || undefined,
-    }),
-    [filters, resolvedCategoryId, searchTerm],
-  );
-
-  const { data, isLoading, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-    useInfiniteListings(queryFilters);
-
-  const rawListings = React.useMemo(
-    () => data?.pages.flatMap((page) => page.data) ?? [],
-    [data],
-  );
-
-  // If category filter is by text name (e.g. static chip and not backend UUID), filter locally
-  const activeCategoryFilter = filters.categoryId;
-  const activeCategoryName = categories.find(
-    (c) => c.id === activeCategoryFilter || c.name.toLowerCase() === activeCategoryFilter?.toLowerCase(),
-  )?.name?.toLowerCase() ?? activeCategoryFilter?.toLowerCase();
-
-  const listings = React.useMemo(() => {
-    if (!activeCategoryFilter || activeCategoryFilter === "all") return rawListings;
-    if (isValidUuid(activeCategoryFilter)) return rawListings;
-    return rawListings.filter(
-      (l) => l.category && l.category.toLowerCase().includes(activeCategoryName ?? ""),
-    );
-  }, [rawListings, activeCategoryFilter, activeCategoryName]);
-
-  function updateFilters(next: SearchListingsParams) {
-    const search = new URLSearchParams();
-    Object.entries(next).forEach(([key, value]) => {
-      if (value !== undefined && value !== "") search.set(key, String(value));
-    });
-    // The term isn't part of SearchListingsParams, so it has to be carried over.
-    if (searchTerm) search.set("q", searchTerm);
-    router.push(`/marketplace?${search.toString()}`);
-  }
-
-  function resetFilters() {
+  function resetAll() {
     setSearchInput("");
-    router.push("/marketplace");
+    navigate(clearFilters(filters));
   }
 
-  const activeCategory = filters.categoryId ?? "all";
+  const activeCount = countActiveFilters(filters);
+  const anyCriteria = hasAnyCriteria(filters);
+  const pageHref = (page: number) => {
+    const qs = serializeFilters({ ...filters, page });
+    return qs ? `${pathname}?${qs}` : pathname;
+  };
+
+  const activeChips = buildActiveChips(filters, categories, t, locale);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      {/* Top Banner Header */}
+      {/* Header */}
       <div className="flex flex-col gap-4 border-b border-border/80 pb-6 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <span className="flex size-2 rounded-full bg-emerald-500" />
-            <span className="text-xs font-mono font-semibold uppercase text-muted-foreground">{t("eyebrow")}</span>
+            <span className="font-mono text-xs font-semibold uppercase text-muted-foreground">{t("eyebrow")}</span>
           </div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("pageTitle")}</h1>
           <p className="mt-1 text-xs text-muted-foreground">{t("pageDescription")}</p>
         </div>
 
-        {/* Search Bar & View Mode Switcher */}
         <div className="flex items-center gap-2">
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
             <Input
+              type="search"
               placeholder={t("searchPlaceholder")}
+              aria-label={t("searchBusinesses")}
               className="h-9 pl-8 text-xs"
+              maxLength={100}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
             />
           </div>
 
-          <div className="flex items-center rounded-lg border border-border/80 bg-muted/20 p-0.5">
+          <div className="hidden items-center rounded-lg border border-border/80 bg-muted/20 p-0.5 sm:flex">
             <Button
               variant="ghost"
               size="icon"
-              className={`size-8 ${marketplaceView === "grid" ? "bg-card shadow-xs text-primary" : "text-muted-foreground"}`}
+              className={cn("size-8", marketplaceView === "grid" ? "bg-card text-primary shadow-xs" : "text-muted-foreground")}
               onClick={() => setMarketplaceView("grid")}
               aria-label={t("gridView")}
+              aria-pressed={marketplaceView === "grid"}
             >
               <LayoutGrid className="size-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className={`size-8 ${marketplaceView === "list" ? "bg-card shadow-xs text-primary" : "text-muted-foreground"}`}
+              className={cn("size-8", marketplaceView === "list" ? "bg-card text-primary shadow-xs" : "text-muted-foreground")}
               onClick={() => setMarketplaceView("list")}
               aria-label={t("listView")}
+              aria-pressed={marketplaceView === "list"}
             >
               <List className="size-4" />
             </Button>
           </div>
 
-          {/* Mobile Filter Trigger Sheet */}
-          <Sheet>
+          {/* Mobile filters */}
+          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs font-semibold lg:hidden">
                 <SlidersHorizontal className="size-3.5" />
                 <span>{t("filters")}</span>
+                {activeCount > 0 && (
+                  <span className="rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+                    {activeCount}
+                  </span>
+                )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 overflow-y-auto p-4">
-              <SheetHeader className="p-0 border-b pb-3">
+            <SheetContent side="right" className="w-[min(20rem,100vw)] overflow-y-auto p-4">
+              <SheetHeader className="border-b p-0 pb-3">
                 <SheetTitle className="text-sm font-bold">{t("filtersSheetTitle")}</SheetTitle>
               </SheetHeader>
-              <div className="mt-4">
-                <ListingFilters
-                  values={filters}
-                  onChange={updateFilters}
-                  onReset={resetFilters}
-                />
+              <div className="mt-4 space-y-3">
+                <ListingFilters filters={filters} categories={categories} onChange={change} onReset={resetAll} />
+                <Button className="w-full" onClick={() => setFiltersOpen(false)}>
+                  {pagination ? t("showResults", { count: pagination.total }) : t("showResultsPending")}
+                </Button>
               </div>
             </SheetContent>
           </Sheet>
         </div>
       </div>
 
-      {/* Quick Category Chips */}
-      <div className="mt-4 flex flex-wrap items-center gap-1.5 overflow-x-auto pb-2">
+      {/* Category chips — real categories from the backend, scrollable on mobile */}
+      <div className="-mx-4 mt-4 flex items-center gap-1.5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
         <button
-          onClick={() => updateFilters({ ...filters, categoryId: undefined })}
-          className={`rounded-md border px-3 py-1 text-xs font-medium transition-all ${
-            !filters.categoryId || filters.categoryId === "all"
-              ? "border-primary bg-primary/10 text-primary font-semibold"
-              : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground"
-          }`}
+          type="button"
+          onClick={() => change({ category: undefined })}
+          className={chipClass(!filters.category && !filters.categoryId)}
+          aria-pressed={!filters.category && !filters.categoryId}
         >
-          {t("quickCategories.all")}
+          {t("allCategories")}
         </button>
-
-        {categories.length > 0
-          ? categories.map((cat) => {
-              const isSelected = filters.categoryId === cat.id || filters.categoryId?.toLowerCase() === cat.name.toLowerCase();
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    updateFilters({
-                      ...filters,
-                      categoryId: isSelected ? undefined : cat.id,
-                    });
-                  }}
-                  className={`rounded-md border px-3 py-1 text-xs font-medium transition-all ${
-                    isSelected
-                      ? "border-primary bg-primary/10 text-primary font-semibold"
-                      : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              );
-            })
-          : STATIC_QUICK_CATEGORIES.filter((c) => c.id !== "all").map((cat) => {
-              const isSelected = activeCategory.toLowerCase().includes(cat.id.toLowerCase());
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    updateFilters({
-                      ...filters,
-                      categoryId: isSelected ? undefined : cat.id,
-                    });
-                  }}
-                  className={`rounded-md border px-3 py-1 text-xs font-medium transition-all ${
-                    isSelected
-                      ? "border-primary bg-primary/10 text-primary font-semibold"
-                      : "border-border/60 bg-card text-muted-foreground hover:border-border hover:text-foreground"
-                  }`}
-                >
-                  {t(`quickCategories.${cat.key}`)}
-                </button>
-              );
-            })}
+        {categoriesQuery.isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-7 w-24 shrink-0" />)
+        ) : categoriesQuery.isError ? (
+          <button
+            type="button"
+            onClick={() => categoriesQuery.refetch()}
+            className="shrink-0 text-xs text-destructive underline-offset-2 hover:underline"
+          >
+            {t("categoriesLoadError")}
+          </button>
+        ) : (
+          categories.map((category) => {
+            const selected = filters.category === category.slug || filters.categoryId === category.id;
+            return (
+              <button
+                key={category.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => change({ category: selected ? undefined : category.slug })}
+                className={chipClass(selected)}
+              >
+                {categoryLabel(t, category)}
+              </button>
+            );
+          })
+        )}
       </div>
 
-      {/* Main Grid: Sidebar + Listings */}
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[250px_1fr]">
         <aside className="hidden lg:block">
-          <ListingFilters values={filters} onChange={updateFilters} onReset={resetFilters} />
+          <ListingFilters filters={filters} categories={categories} onChange={change} onReset={resetAll} />
         </aside>
 
-        <div>
-          {isError ? (
-            <ErrorState error={error} onRetry={() => refetch()} />
-          ) : isLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="min-w-0">
+          {/* Result count + active filters */}
+          <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+            <span className="font-medium text-foreground" aria-live="polite">
+              {pagination ? t("resultsCount", { count: pagination.total }) : " "}
+            </span>
+            {listingsQuery.isFetching && !listingsQuery.isLoading && (
+              <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-label={t("updatingResults")} />
+            )}
+            {activeChips.map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                onClick={() => {
+                  if (chip.key === "q") setSearchInput("");
+                  change(chip.clear);
+                }}
+                className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/40 px-2 py-0.5 text-[11px] text-foreground hover:border-border"
+                aria-label={t("removeFilter", { filter: chip.label })}
+              >
+                {chip.label}
+                <X className="size-3 text-muted-foreground" />
+              </button>
+            ))}
+            {anyCriteria && (
+              <Button variant="link" size="sm" className="h-auto p-0 text-[11px]" onClick={resetAll}>
+                {t("clearAllFilters")}
+              </Button>
+            )}
+          </div>
+
+          {listingsQuery.isError ? (
+            <ErrorState title={t("unableToLoad")} error={listingsQuery.error} onRetry={() => listingsQuery.refetch()} />
+          ) : listingsQuery.isLoading ? (
+            <div className={cn("grid gap-5", marketplaceView === "grid" ? "sm:grid-cols-2 xl:grid-cols-3" : "grid-cols-1")}>
               {Array.from({ length: 6 }).map((_, i) => (
                 <ListingCardSkeleton key={i} />
               ))}
             </div>
           ) : listings.length === 0 ? (
-            <EmptyState
-              icon={Store}
-              title={t("noMatchTitle")}
-              description={t("noMatchDescription")}
-              action={
-                <Button variant="outline" size="sm" onClick={resetFilters}>
-                  {t("clearAllFilters")}
-                </Button>
-              }
-            />
+            pagination && pagination.total > 0 ? (
+              // e.g. a shared link to a page that no longer exists
+              <EmptyState
+                icon={Store}
+                title={t("pageOutOfRange")}
+                action={
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={pageHref(1)}>{t("backToFirstPage")}</Link>
+                  </Button>
+                }
+              />
+            ) : anyCriteria ? (
+              <EmptyState
+                icon={Store}
+                title={t("noMatchTitle")}
+                description={t("noMatchDescription")}
+                action={
+                  <Button variant="outline" size="sm" onClick={resetAll}>
+                    {t("clearAllFilters")}
+                  </Button>
+                }
+              />
+            ) : (
+              <EmptyState
+                icon={Store}
+                title={t("noListingsYetTitle")}
+                description={t("noListingsYetDescription")}
+                action={
+                  isSellerRole(user?.role) ? (
+                    <Button size="sm" asChild>
+                      <Link href="/dashboard/businesses/new">
+                        <Plus className="size-4" />
+                        {t("listYourBusiness")}
+                      </Link>
+                    </Button>
+                  ) : undefined
+                }
+              />
+            )
           ) : (
             <>
               <div
-                className={`grid gap-5 ${
-                  marketplaceView === "grid"
-                    ? "sm:grid-cols-2 xl:grid-cols-3"
-                    : "grid-cols-1"
-                }`}
+                className={cn(
+                  "grid gap-5 transition-opacity",
+                  marketplaceView === "grid" ? "sm:grid-cols-2 xl:grid-cols-3" : "grid-cols-1",
+                  listingsQuery.isPlaceholderData && "opacity-60",
+                )}
               >
                 {listings.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
               </div>
 
-              {hasNextPage && (
-                <div className="mt-10 flex justify-center">
-                  <Button
-                    variant="outline"
-                    className="h-10 px-6 font-semibold"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                  >
-                    {isFetchingNextPage ? t("loadingMore") : t("loadMoreBusinesses")}
-                  </Button>
-                </div>
+              {pagination && pagination.totalPages > 1 && (
+                <MarketplacePagination
+                  page={pagination.page}
+                  totalPages={pagination.totalPages}
+                  hrefFor={pageHref}
+                />
               )}
             </>
           )}
@@ -351,4 +364,121 @@ export function MarketplaceView() {
       </div>
     </div>
   );
+}
+
+function MarketplacePagination({
+  page,
+  totalPages,
+  hrefFor,
+}: {
+  page: number;
+  totalPages: number;
+  hrefFor: (page: number) => string;
+}) {
+  const { t } = useTranslation("marketplace");
+  const pages = visiblePages(page, totalPages);
+
+  return (
+    <nav aria-label={t("pagination")} className="mt-10 flex items-center justify-center gap-1">
+      <PageButton href={page > 1 ? hrefFor(page - 1) : undefined} label={t("previousPage")}>
+        <ChevronLeft className="size-4" />
+        <span className="hidden sm:inline">{t("previousPage")}</span>
+      </PageButton>
+      {pages.map((p, i) =>
+        p === null ? (
+          <span key={`gap-${i}`} className="px-1 text-xs text-muted-foreground">
+            …
+          </span>
+        ) : (
+          <Button
+            key={p}
+            variant={p === page ? "outline" : "ghost"}
+            size="icon"
+            className="size-8 text-xs"
+            asChild
+          >
+            <Link href={hrefFor(p)} scroll aria-current={p === page ? "page" : undefined}>
+              {p}
+            </Link>
+          </Button>
+        ),
+      )}
+      <PageButton href={page < totalPages ? hrefFor(page + 1) : undefined} label={t("nextPage")}>
+        <span className="hidden sm:inline">{t("nextPage")}</span>
+        <ChevronRight className="size-4" />
+      </PageButton>
+    </nav>
+  );
+}
+
+function PageButton({ href, label, children }: { href?: string; label: string; children: React.ReactNode }) {
+  if (!href) {
+    return (
+      <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" disabled aria-label={label}>
+        {children}
+      </Button>
+    );
+  }
+  return (
+    <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" asChild>
+      <Link href={href} aria-label={label}>
+        {children}
+      </Link>
+    </Button>
+  );
+}
+
+/** 1 … 4 5 6 … 20 */
+function visiblePages(page: number, total: number): (number | null)[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([1, total, page - 1, page, page + 1].filter((p) => p >= 1 && p <= total));
+  const sorted = [...pages].sort((a, b) => a - b);
+  const out: (number | null)[] = [];
+  sorted.forEach((p, i) => {
+    if (i > 0 && p - sorted[i - 1] > 1) out.push(null);
+    out.push(p);
+  });
+  return out;
+}
+
+type Translate = ReturnType<typeof useTranslation>["t"];
+
+function buildActiveChips(
+  filters: MarketplaceFilters,
+  categories: { id: string; name: string; slug: string }[],
+  t: Translate,
+  locale: Locale,
+): { key: string; label: string; clear: Partial<MarketplaceFilters> }[] {
+  const chips: { key: string; label: string; clear: Partial<MarketplaceFilters> }[] = [];
+  if (filters.q) chips.push({ key: "q", label: `“${filters.q}”`, clear: { q: undefined } });
+
+  const category = categories.find((c) => c.slug === filters.category || c.id === filters.categoryId);
+  if (filters.category || filters.categoryId) {
+    chips.push({
+      key: "category",
+      label: category ? categoryLabel(t, category) : (filters.category ?? t("category")),
+      clear: { category: undefined },
+    });
+  }
+  if (filters.businessModel) {
+    chips.push({ key: "model", label: filters.businessModel, clear: { businessModel: undefined } });
+  }
+
+  const money = (value: number) => formatCompactMoney(value, "USD", locale);
+  const rangeLabels = { price: t("price"), revenue: t("monthlyRevenue"), profit: t("monthlyProfit") };
+  for (const field of RANGE_FIELDS) {
+    const [minKey, maxKey] = rangeKeys(field);
+    const min = filters[minKey];
+    const max = filters[maxKey];
+    if (min === undefined && max === undefined) continue;
+    const range =
+      min !== undefined && max !== undefined
+        ? `${money(min)}–${money(max)}`
+        : min !== undefined
+          ? `≥ ${money(min)}`
+          : `≤ ${money(max!)}`;
+    chips.push({ key: field, label: `${rangeLabels[field]}: ${range}`, clear: { [minKey]: undefined, [maxKey]: undefined } });
+  }
+  if (filters.verified) chips.push({ key: "verified", label: t("verifiedOnly"), clear: { verified: undefined } });
+  return chips;
 }

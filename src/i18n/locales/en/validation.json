@@ -11,5 +11,6 @@
   "valueMustBeZeroOrGreater": "Value must be zero or greater",
   "periodRequired": "Period is required",
   "amountGreaterThanZero": "Enter an amount greater than zero",
-  "messageRequired": "Message can't be empty"
+  "messageRequired": "Message can't be empty",
+  "messageTooLong": "Message is too long (max 5000 characters)"
 }

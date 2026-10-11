@@ -29,10 +29,11 @@ async function getListingEntries(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [];
 
   try {
-    let cursor: string | undefined;
-    do {
+    let page = 1;
+    let hasMore = true;
+    while (hasMore) {
       const { data, pagination } = await listingsApi.search(
-        { cursor, limit: 100 },
+        { page, limit: 50 },
         publicApiFetch as unknown as ApiFetcher,
       );
       for (const listing of data) {
@@ -43,8 +44,9 @@ async function getListingEntries(): Promise<MetadataRoute.Sitemap> {
           priority: 0.7,
         });
       }
-      cursor = pagination.hasMore ? (pagination.nextCursor ?? undefined) : undefined;
-    } while (cursor);
+      hasMore = pagination.hasMore;
+      page += 1;
+    }
   } catch {
     return [];
   }

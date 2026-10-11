@@ -1,25 +1,30 @@
 "use client";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { listingsApi, type SearchListingsParams } from "@/lib/api/listings";
 import { categoriesApi } from "@/lib/api/categories";
 import { queryKeys } from "@/lib/query/keys";
 
-export function useListings(params: SearchListingsParams) {
+/**
+ * One request per distinct query: React Query dedupes identical keys, and
+ * passes an AbortSignal so a superseded request (the user typed or clicked
+ * again) is cancelled and its response can never overwrite newer results.
+ * The previous page stays on screen while the next one loads.
+ */
+export function useListings(params: SearchListingsParams, options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.listings(params as Record<string, unknown>),
-    queryFn: () => listingsApi.search(params),
-    placeholderData: (prev) => prev,
+    queryFn: ({ signal }) => listingsApi.search(params, undefined, signal),
+    placeholderData: keepPreviousData,
+    enabled: options.enabled ?? true,
   });
 }
 
-export function useInfiniteListings(params: Omit<SearchListingsParams, "cursor">) {
-  return useInfiniteQuery({
-    queryKey: queryKeys.infiniteListings(params as Record<string, unknown>),
-    queryFn: ({ pageParam }) => listingsApi.search({ ...params, cursor: pageParam }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) =>
-      lastPage.pagination.hasMore ? (lastPage.pagination.nextCursor ?? undefined) : undefined,
+export function useListingFacets() {
+  return useQuery({
+    queryKey: queryKeys.listingFacets,
+    queryFn: () => listingsApi.facets(),
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -38,4 +43,3 @@ export function useCategories() {
     staleTime: 5 * 60 * 1000,
   });
 }
-
