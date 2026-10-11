@@ -211,5 +211,9 @@
   "publicListingsCount_one": "{{count}} public listing",
   "publicListingsCount_other": "{{count}} public listings",
   "sellerPrivacyNote": "Contact details stay private — message the seller from one of their listings.",
-  "sellerNotFound": "Seller not found"
+  "sellerNotFound": "Seller not found",
+  "priceOnRequest": "Price on request",
+  "priceNotSet": "No price yet",
+  "ownUnpublishedHint": "This business isn’t published yet, so buyers can’t see it.",
+  "editAndPublish": "Edit and publish"
 }

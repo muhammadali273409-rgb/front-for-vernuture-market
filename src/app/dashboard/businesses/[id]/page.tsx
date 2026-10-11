@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ExternalLink, Trash2 } from "lucide-react";
@@ -27,6 +27,7 @@ import { ListingSettingsForm } from "@/components/business/listing-settings-form
 import { DocumentManager } from "@/components/business/document-manager";
 import { BusinessImageManager } from "@/components/business/business-image-manager";
 import { DeleteBusinessDialog } from "@/components/business/delete-business-dialog";
+import { PublishChecklist } from "@/components/business/publish-checklist";
 import { useBusiness, useUpdateBusiness } from "@/hooks/use-businesses";
 import { useCategories } from "@/hooks/use-listings";
 import { useForm } from "react-hook-form";
@@ -35,7 +36,31 @@ import { createBusinessSchema, type CreateBusinessValues } from "@/lib/validatio
 import { toast } from "sonner";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
-import type { OwnedBusiness } from "@/types/domain";
+import { categoryLabel, orderCategories } from "@/lib/marketplace/categories";
+import {
+  PUBLISH_FIELD_TAB,
+  focusPublishField,
+  isPublishField,
+  publishFieldDomId,
+} from "@/lib/business/publish-fields";
+import type { OwnedBusiness, PublishField } from "@/types/domain";
+
+/** Marks fields a publish attempt was refused for, so FormMessage shows them in red. */
+function useHighlightErrors(
+  highlight: PublishField[],
+  fields: PublishField[],
+  setError: (name: never, error: { type: string; message: string }) => void,
+) {
+  useEffect(() => {
+    for (const field of highlight) {
+      if (fields.includes(field)) {
+        setError(field as never, { type: "required", message: "validation:requiredToPublish" });
+      }
+    }
+  }, [highlight, fields, setError]);
+}
+
+const OVERVIEW_FIELDS: PublishField[] = ["name", "description", "categoryId", "businessModel"];
 
 /** Mirrors the backend's edit lock; the backend still rejects edits on its own. */
 const LOCKED_STATUSES: OwnedBusiness["status"][] = ["PENDING_REVIEW", "SOLD", "SUSPENDED", "ARCHIVED"];
@@ -43,14 +68,24 @@ const LOCKED_STATUSES: OwnedBusiness["status"][] = ["PENDING_REVIEW", "SOLD", "S
 /** Statuses a seller can delete from; a live listing must be unpublished first. */
 const DELETABLE_STATUSES: OwnedBusiness["status"][] = ["DRAFT", "REJECTED", "PAUSED"];
 
-function OverviewTab({ businessId, values }: { businessId: string; values: CreateBusinessValues }) {
+function OverviewTab({
+  businessId,
+  values,
+  highlight,
+}: {
+  businessId: string;
+  values: CreateBusinessValues;
+  highlight: PublishField[];
+}) {
   const { t } = useTranslation(["business", "settings", "common", "errors"]);
   const updateBusiness = useUpdateBusiness(businessId);
-  const { data: categories = [] } = useCategories();
+  const { data: rawCategories } = useCategories();
+  const categories = orderCategories(rawCategories ?? []);
   const form = useForm<CreateBusinessValues>({
     resolver: zodResolver(createBusinessSchema),
     defaultValues: values,
   });
+  useHighlightErrors(highlight, OVERVIEW_FIELDS, form.setError as never);
 
   function onSubmit(next: CreateBusinessValues) {
     updateBusiness.mutate(
@@ -77,7 +112,7 @@ function OverviewTab({ businessId, values }: { businessId: string; values: Creat
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
+            <FormItem id={publishFieldDomId("name")}>
               <FormLabel>{t("business:businessName")}</FormLabel>
               <FormControl>
                 <Input {...field} />
@@ -90,7 +125,7 @@ function OverviewTab({ businessId, values }: { businessId: string; values: Creat
           control={form.control}
           name="description"
           render={({ field }) => (
-            <FormItem>
+            <FormItem id={publishFieldDomId("description")}>
               <FormLabel>{t("business:description")}</FormLabel>
               <FormControl>
                 <Textarea rows={5} {...field} />
@@ -104,7 +139,7 @@ function OverviewTab({ businessId, values }: { businessId: string; values: Creat
             control={form.control}
             name="categoryId"
             render={({ field }) => (
-              <FormItem>
+              <FormItem id={publishFieldDomId("categoryId")}>
                 <FormLabel>{t("business:category")}</FormLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <FormControl>
@@ -115,7 +150,7 @@ function OverviewTab({ businessId, values }: { businessId: string; values: Creat
                   <SelectContent>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
-                        {category.name}
+                        {categoryLabel(t, category)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -128,7 +163,7 @@ function OverviewTab({ businessId, values }: { businessId: string; values: Creat
             control={form.control}
             name="businessModel"
             render={({ field }) => (
-              <FormItem>
+              <FormItem id={publishFieldDomId("businessModel")}>
                 <FormLabel>{t("business:businessModel")}</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -193,6 +228,44 @@ export default function BusinessDetailPage({ params }: { params: Promise<{ id: s
   const router = useRouter();
   const { data: business, isLoading, isError, error, refetch } = useBusiness(id);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [tab, setTab] = useState("overview");
+  // Fields a publish attempt was just refused for (also arrives as ?missing=… from other pages).
+  const [blocked, setBlocked] = useState<PublishField[]>(() =>
+    typeof window === "undefined"
+      ? []
+      : (new URLSearchParams(window.location.search).get("missing")?.split(",").filter(isPublishField) ?? []),
+  );
+
+  const goToField = useCallback((field: PublishField) => {
+    setTab(PUBLISH_FIELD_TAB[field]);
+    // Let the tab render before scrolling to the field.
+    setTimeout(() => focusPublishField(field), 60);
+  }, []);
+
+  const onPublishBlocked = useCallback(
+    (missing: PublishField[]) => {
+      setBlocked(missing);
+      if (missing[0]) goToField(missing[0]);
+    },
+    [goToField],
+  );
+
+  // Stop highlighting a field once the backend no longer reports it missing.
+  const missingKey = (business?.missingForPublish ?? []).join(",");
+  const highlight = useMemo(
+    () => blocked.filter((field) => missingKey.split(",").includes(field)),
+    [blocked, missingKey],
+  );
+
+  // Arrived with ?missing=… (from "My projects" or the marketplace): jump to the first field once loaded.
+  const businessLoaded = Boolean(business);
+  useEffect(() => {
+    if (!businessLoaded || blocked.length === 0) return;
+    const timer = setTimeout(() => goToField(blocked[0]), 0);
+    return () => clearTimeout(timer);
+    // Only once, when the project first loads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businessLoaded]);
 
   if (isLoading) {
     return (
@@ -246,9 +319,17 @@ export default function BusinessDetailPage({ params }: { params: Promise<{ id: s
         {isLive ? t("project.liveNotice") : t("project.draftNotice")}
       </p>
 
+      {!isLive && (
+        <PublishChecklist
+          missing={business.missingForPublish ?? []}
+          blocked={highlight.length > 0}
+          onGoToField={goToField}
+        />
+      )}
+
       <Card>
         <CardContent>
-          <Tabs defaultValue="overview">
+          <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="flex-wrap">
               <TabsTrigger value="overview">{t("seller.tabs.overview")}</TabsTrigger>
               <TabsTrigger value="listing">{t("seller.tabs.listing")}</TabsTrigger>
@@ -270,11 +351,12 @@ export default function BusinessDetailPage({ params }: { params: Promise<{ id: s
                   city: business.city ?? "",
                   website: business.website ?? "",
                 }}
+                highlight={highlight}
               />
             </TabsContent>
 
             <TabsContent value="listing" className="pt-4">
-              <ListingSettingsForm business={business} />
+              <ListingSettingsForm business={business} highlight={highlight} onPublishBlocked={onPublishBlocked} />
             </TabsContent>
 
             <TabsContent value="media" className="pt-4">

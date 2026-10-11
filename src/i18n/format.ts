@@ -1,4 +1,5 @@
 import { LOCALE_BCP47, type Locale } from "./settings";
+import { formatTajikCurrency } from "./tajik-number";
 
 function intlLocale(locale: Locale): string {
   return LOCALE_BCP47[locale];
@@ -14,6 +15,7 @@ export function formatCurrency(
   currency: string = "USD",
   options?: Intl.NumberFormatOptions,
 ): string {
+  if (locale === "tj") return formatTajikCurrency(value, currency, { maximumFractionDigits: 0, ...options });
   return new Intl.NumberFormat(intlLocale(locale), {
     style: "currency",
     currency,

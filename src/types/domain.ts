@@ -1,3 +1,6 @@
+/** Fields the backend requires before a listing can be published. */
+export type PublishField = "name" | "description" | "categoryId" | "businessModel" | "askingPrice";
+
 export type UserRole = "BUYER" | "SELLER" | "BUYER_SELLER" | "ADMIN" | "MODERATOR";
 
 export type PlanCode = "FREE" | "BUYER_PRO" | "SELLER_PRO" | "BUSINESS";
@@ -211,6 +214,8 @@ export interface BusinessMetric {
 }
 
 export interface OwnedBusiness {
+  /** Fields still required before this can be published (from the backend). */
+  missingForPublish?: PublishField[];
   id: string;
   ownerId: string;
   organizationId: string | null;

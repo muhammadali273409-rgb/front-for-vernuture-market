@@ -36,6 +36,9 @@ import { formatCompactMoney } from "@/lib/utils/format";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
 import { toast } from "sonner";
+import type { Locale } from "@/i18n/settings";
+import { categoryLabel } from "@/lib/marketplace/categories";
+import { describeMissing, missingFieldsFromError } from "@/lib/business/publish-fields";
 import type { OwnedBusiness } from "@/types/domain";
 
 const PUBLISHABLE: OwnedBusiness["status"][] = ["DRAFT", "REJECTED", "PENDING_REVIEW", "PAUSED"];
@@ -48,9 +51,10 @@ function ProjectCard({
   business: OwnedBusiness;
   onDelete: (business: OwnedBusiness) => void;
 }) {
-  const { t } = useTranslation(["business", "errors"]);
+  const { t, i18n } = useTranslation(["business", "errors", "marketplace"]);
   const router = useRouter();
   const statusAction = useBusinessStatusAction();
+  const missing = business.status === "PUBLISHED" ? [] : (business.missingForPublish ?? []);
 
   const logo = business.images?.find((i) => i.kind === "LOGO");
   const cover = business.images?.find((i) => i.kind === "GALLERY");
@@ -62,7 +66,16 @@ function ProjectCard({
       { id: business.id, action },
       {
         onSuccess: () => toast.success(t(successKey)),
-        onError: (error) => toast.error(friendlyErrorMessage(error, t, { showValidationDetail: true })),
+        onError: (error) => {
+          const missingFields = missingFieldsFromError(error);
+          if (missingFields && missingFields.length > 0) {
+            // Name the fields and open the project with them highlighted.
+            toast.error(describeMissing(t, missingFields));
+            router.push(`/dashboard/businesses/${business.id}?missing=${missingFields.join(",")}`);
+            return;
+          }
+          toast.error(friendlyErrorMessage(error, t, { showValidationDetail: true }));
+        },
       },
     );
   }
@@ -92,7 +105,8 @@ function ProjectCard({
               <h3 className="line-clamp-1 font-semibold hover:text-primary">{business.name}</h3>
             </Link>
             <p className="line-clamp-1 text-xs text-muted-foreground">
-              {[business.category?.name, location].filter(Boolean).join(" · ") || "—"}
+              {[business.category ? categoryLabel(t, business.category) : null, location].filter(Boolean).join(" · ") ||
+                "—"}
             </p>
           </div>
 
@@ -152,10 +166,21 @@ function ProjectCard({
           {business.listing?.headline || business.description || t("project.noDescription")}
         </p>
 
+        {missing.length > 0 && (
+          <Link
+            href={`/dashboard/businesses/${business.id}?missing=${missing.join(",")}`}
+            className="rounded-md border border-amber-500/40 bg-amber-500/5 px-2.5 py-1.5 text-xs text-foreground hover:border-amber-500"
+          >
+            <span className="font-medium">{t("publishMissing.cardHint")}</span> {describeMissing(t, missing)}
+          </Link>
+        )}
+
         <div className="flex items-center justify-between border-t border-border/60 pt-3">
           <span className="text-[11px] font-medium uppercase text-muted-foreground">{t("askingPrice")}</span>
           <span className="font-mono text-sm font-semibold text-primary">
-            {formatCompactMoney(business.listing?.askingPrice, business.listing?.currency)}
+            {business.listing?.askingPrice != null
+              ? formatCompactMoney(business.listing.askingPrice, business.listing.currency, i18n.language as Locale)
+              : t("marketplace:priceNotSet")}
           </span>
         </div>
       </CardContent>

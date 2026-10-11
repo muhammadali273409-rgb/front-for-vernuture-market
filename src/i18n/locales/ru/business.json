@@ -129,7 +129,7 @@
     "published": "Опубликовано",
     "unpublished": "Не опубликовано",
     "pendingReview": "На рассмотрении",
-    "paused": "Приостановлено",
+    "paused": "Скрыт",
     "sold": "Продано",
     "rejected": "Отклонено",
     "suspended": "Заблокировано",
@@ -220,5 +220,14 @@
     "sellerFallback": "Продавец VentureMarket",
     "memberSince": "На платформе с {{date}}",
     "gallerySection": "Галерея"
+  },
+  "publishMissing": {
+    "title": "Для публикации заполните:",
+    "sentence_one": "Не заполнено: {{fields}}.",
+    "sentence_few": "Не заполнены: {{fields}}.",
+    "sentence_many": "Не заполнены: {{fields}}.",
+    "sentence_other": "Не заполнены: {{fields}}.",
+    "and": "и",
+    "cardHint": "Для публикации:"
   }
 }

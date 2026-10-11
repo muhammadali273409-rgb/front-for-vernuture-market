@@ -66,8 +66,34 @@ import enErrors from "./locales/en/errors.json";
 import enPricing from "./locales/en/pricing.json";
 import enValidation from "./locales/en/validation.json";
 
-export const resources: Resource = {
-  tj: {
+type Bundle = { [key: string]: string | Bundle };
+
+/**
+ * Tajik has one noun form after a number ("5 бизнес"), so its files only
+ * define `_one`/`_other`. But "tj" isn't a CLDR language code (Tajik is
+ * "tg"), so i18next resolves plural rules through Intl.PluralRules("tj"),
+ * which in browsers falls back to another language's rules (often Russian)
+ * and asks for `_few`/`_many` — keys Tajik doesn't have, so the text fell
+ * back to English ("0 businesses"). Filling every plural category from
+ * `_other` makes Tajik plurals work whatever rule the runtime picks.
+ */
+function withAllPluralForms<T>(bundle: T): T {
+  const source = bundle as unknown as Bundle;
+  const out: Bundle = {};
+  for (const [key, value] of Object.entries(source)) {
+    out[key] = typeof value === "string" ? value : withAllPluralForms(value);
+  }
+  for (const [key, value] of Object.entries(source)) {
+    if (typeof value !== "string" || !key.endsWith("_other")) continue;
+    const base = key.slice(0, -"_other".length);
+    for (const form of ["zero", "one", "two", "few", "many"]) {
+      if (!(`${base}_${form}` in out)) out[`${base}_${form}`] = value;
+    }
+  }
+  return out as unknown as T;
+}
+
+const tjResources = {
     common: tjCommon,
     auth: tjAuth,
     navigation: tjNavigation,
@@ -89,7 +115,12 @@ export const resources: Resource = {
     errors: tjErrors,
     pricing: tjPricing,
     validation: tjValidation,
-  },
+};
+
+export const resources: Resource = {
+  tj: Object.fromEntries(
+    Object.entries(tjResources).map(([ns, bundle]) => [ns, withAllPluralForms(bundle)]),
+  ),
   ru: {
     common: ruCommon,
     auth: ruAuth,

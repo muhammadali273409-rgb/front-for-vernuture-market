@@ -12,5 +12,10 @@
   "periodRequired": "Давра ҳатмист",
   "amountGreaterThanZero": "Маблағи аз сифр зиёдтарро ворид кунед",
   "messageRequired": "Паём наметавонад холӣ бошад",
-  "messageTooLong": "Паём хеле дароз аст (ҳадди аксар 5000 аломат)"
+  "messageTooLong": "Паём хеле дароз аст (ҳадди аксар 5000 аломат)",
+  "descriptionRequired": "Тавсифро ворид кунед",
+  "categoryRequired": "Категорияро интихоб кунед",
+  "businessModelRequired": "Модели бизнесро ворид кунед",
+  "askingPriceRequired": "Нархи пешниҳодшударо ворид кунед",
+  "requiredToPublish": "Барои нашр ҳатмист"
 }

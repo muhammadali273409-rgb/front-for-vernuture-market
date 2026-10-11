@@ -79,6 +79,10 @@ export default async function BusinessDetailPage({ params }: PageProps) {
   const annualRevenue = getMetricValue(listing.metrics, "REVENUE");
 
   const location = [listing.city, listing.country].filter(Boolean).join(", ");
+  const category =
+    listing.category && listing.categorySlug
+      ? t(`categories.${listing.categorySlug}`, { defaultValue: listing.category })
+      : listing.category;
   const gallery = (listing.images ?? []).filter((image) => image.kind === "GALLERY");
   const seller = listing.seller;
   const sellerName = seller?.name || seller?.company || t("business:project.sellerFallback");
@@ -92,7 +96,7 @@ export default async function BusinessDetailPage({ params }: PageProps) {
             {t("marketplace")}
           </Link>
           <span>/</span>
-          <span>{listing.category ?? t("global")}</span>
+          <span>{category ?? t("global")}</span>
           <span>/</span>
           <span className="font-semibold text-foreground">{listing.name}</span>
         </div>
@@ -113,7 +117,7 @@ export default async function BusinessDetailPage({ params }: PageProps) {
           <div className="flex flex-wrap items-center gap-2">
             {listing.category && (
               <Badge variant="secondary" className="px-2.5 py-0.5 text-xs font-semibold">
-                {listing.category}
+                {category}
               </Badge>
             )}
             <span className="flex items-center gap-1 rounded-sm border border-border/60 bg-muted/40 px-2 py-0.5 text-xs font-mono uppercase text-muted-foreground">
@@ -191,7 +195,9 @@ export default async function BusinessDetailPage({ params }: PageProps) {
             </span>
             <div className="flex items-baseline gap-2 lg:justify-end">
               <span className="font-mono text-3xl font-extrabold text-foreground">
-                {formatCompactMoney(listing.askingPrice, listing.currency, locale)}
+                {listing.askingPrice !== null
+                  ? formatCompactMoney(listing.askingPrice, listing.currency, locale)
+                  : t("priceOnRequest")}
               </span>
             </div>
             {multiple && (

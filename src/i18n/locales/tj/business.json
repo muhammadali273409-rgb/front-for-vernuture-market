@@ -125,11 +125,11 @@
     }
   },
   "status": {
-    "draft": "Лоиҳа",
+    "draft": "Сиёҳнавис",
     "published": "Нашршуда",
     "unpublished": "Нашрнашуда",
     "pendingReview": "Дар интизории баррасӣ",
-    "paused": "Таваққуфшуда",
+    "paused": "Пинҳон",
     "sold": "Фурӯхташуда",
     "rejected": "Рад шуда",
     "suspended": "Боздошташуда",
@@ -220,5 +220,12 @@
     "sellerFallback": "Фурӯшандаи VentureMarket",
     "memberSince": "Дар платформа аз {{date}}",
     "gallerySection": "Галерея"
+  },
+  "publishMissing": {
+    "title": "Барои нашр инҳоро пур кунед:",
+    "sentence_one": "{{fields}} пур карда нашудааст.",
+    "sentence_other": "{{fields}} пур карда нашудаанд.",
+    "and": "ва",
+    "cardHint": "Барои нашр:"
   }
 }

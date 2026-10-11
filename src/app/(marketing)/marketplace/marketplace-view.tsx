@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   List,
   Loader2,
+  Pencil,
   Plus,
   Search,
   SlidersHorizontal,
@@ -26,11 +27,12 @@ import { ListingCardSkeleton } from "@/components/marketplace/listing-card-skele
 import { ListingFilters } from "@/components/marketplace/listing-filters";
 import { useCategories, useListings } from "@/hooks/use-listings";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useMyBusinesses } from "@/hooks/use-businesses";
 import { useUiStore } from "@/stores/ui-store";
 import { useTranslation } from "@/i18n/client";
 import type { Locale } from "@/i18n/settings";
 import { isSellerRole } from "@/lib/auth/roles";
-import { formatCompactMoney } from "@/lib/utils/format";
+import { formatMoney } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
 import { categoryLabel, orderCategories } from "@/lib/marketplace/categories";
 import {
@@ -136,6 +138,15 @@ export function MarketplaceView() {
   };
 
   const activeChips = buildActiveChips(filters, categories, t, locale);
+
+  // A seller searching for their own project that isn't live yet gets told
+  // why it isn't in the results, with a way to fix that.
+  const isSeller = isSellerRole(user?.role);
+  const { data: myBusinesses = [] } = useMyBusinesses({ enabled: isSeller && Boolean(filters.q) });
+  const term = filters.q?.toLowerCase();
+  const myUnpublished = term
+    ? myBusinesses.filter((b) => b.status !== "PUBLISHED" && b.name.toLowerCase().includes(term))
+    : [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -288,6 +299,30 @@ export function MarketplaceView() {
               </Button>
             )}
           </div>
+
+          {myUnpublished.map((business) => (
+            <div
+              key={business.id}
+              role="status"
+              className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/40 bg-amber-500/5 px-4 py-3 text-sm"
+            >
+              <span>
+                <span className="font-semibold">{business.name}</span> — {t("ownUnpublishedHint")}
+              </span>
+              <Button asChild size="sm" variant="outline" className="h-8 gap-1.5 text-xs">
+                <Link
+                  href={
+                    business.missingForPublish?.length
+                      ? `/dashboard/businesses/${business.id}?missing=${business.missingForPublish.join(",")}`
+                      : `/dashboard/businesses/${business.id}`
+                  }
+                >
+                  <Pencil className="size-3.5" />
+                  {t("editAndPublish")}
+                </Link>
+              </Button>
+            </div>
+          ))}
 
           {listingsQuery.isError ? (
             <ErrorState title={t("unableToLoad")} error={listingsQuery.error} onRetry={() => listingsQuery.refetch()} />
@@ -464,7 +499,7 @@ function buildActiveChips(
     chips.push({ key: "model", label: filters.businessModel, clear: { businessModel: undefined } });
   }
 
-  const money = (value: number) => formatCompactMoney(value, "USD", locale);
+  const money = (value: number) => formatMoney(value, "USD", locale);
   const rangeLabels = { price: t("price"), revenue: t("monthlyRevenue"), profit: t("monthlyProfit") };
   for (const field of RANGE_FIELDS) {
     const [minKey, maxKey] = rangeKeys(field);

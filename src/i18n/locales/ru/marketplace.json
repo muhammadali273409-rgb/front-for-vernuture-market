@@ -186,8 +186,8 @@
     "revenue_desc": "Выручка в месяц: по убыванию",
     "profit_desc": "Прибыль в месяц: по убыванию"
   },
-  "minPlaceholder": "Мин",
-  "maxPlaceholder": "Макс",
+  "minPlaceholder": "От",
+  "maxPlaceholder": "До",
   "rangeInvalid": "Введите целое число.",
   "rangeInverted": "Минимум не может быть больше максимума.",
   "figureVerified": "Проверено",
@@ -217,5 +217,9 @@
   "publicListingsCount_many": "{{count}} публичных объявлений",
   "publicListingsCount_other": "{{count}} публичных объявления",
   "sellerPrivacyNote": "Контакты продавца скрыты — напишите ему со страницы одного из объявлений.",
-  "sellerNotFound": "Продавец не найден"
+  "sellerNotFound": "Продавец не найден",
+  "priceOnRequest": "Цена по запросу",
+  "priceNotSet": "Цена не указана",
+  "ownUnpublishedHint": "Этот бизнес ещё не опубликован, поэтому покупатели его не видят.",
+  "editAndPublish": "Изменить и опубликовать"
 }

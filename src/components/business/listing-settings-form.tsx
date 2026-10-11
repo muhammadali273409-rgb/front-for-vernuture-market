@@ -17,11 +17,23 @@ import { listingDetailsSchema, type ListingDetailsValues } from "@/lib/validatio
 import { toast } from "sonner";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
-import type { OwnedBusiness } from "@/types/domain";
+import { describeMissing, missingFieldsFromError, publishFieldDomId } from "@/lib/business/publish-fields";
+import type { OwnedBusiness, PublishField } from "@/types/domain";
+import { useEffect } from "react";
 
 const LOCKED_STATUSES: OwnedBusiness["status"][] = ["PENDING_REVIEW", "SOLD", "SUSPENDED", "ARCHIVED"];
 
-export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
+export function ListingSettingsForm({
+  business,
+  highlight = [],
+  onPublishBlocked,
+}: {
+  business: OwnedBusiness;
+  /** Fields a publish attempt was refused for. */
+  highlight?: PublishField[];
+  /** Called when publishing is refused because fields are missing. */
+  onPublishBlocked?: (missing: PublishField[]) => void;
+}) {
   const { t } = useTranslation(["business", "errors"]);
   const updateListing = useUpdateListing(business.id);
   const statusAction = useListingStatusAction(business.id);
@@ -34,6 +46,12 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
       currency: business.listing?.currency ?? "USD",
     },
   });
+
+  useEffect(() => {
+    if (highlight.includes("askingPrice")) {
+      form.setError("askingPrice", { type: "required", message: "validation:requiredToPublish" });
+    }
+  }, [highlight, form]);
 
   function onSubmit(values: ListingDetailsValues) {
     updateListing.mutate(
@@ -51,7 +69,16 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
   function runAction(action: ListingStatusAction, successKey: string) {
     statusAction.mutate(action, {
       onSuccess: () => toast.success(t(successKey)),
-      onError: (e) => toast.error(friendlyErrorMessage(e, t, { showValidationDetail: true })),
+      onError: (e) => {
+        const missing = missingFieldsFromError(e);
+        if (missing && missing.length > 0) {
+          // Name the exact fields and take the seller to the first one.
+          toast.error(describeMissing(t, missing));
+          onPublishBlocked?.(missing);
+          return;
+        }
+        toast.error(friendlyErrorMessage(e, t, { showValidationDetail: true }));
+      },
     });
   }
 
@@ -79,7 +106,7 @@ export function ListingSettingsForm({ business }: { business: OwnedBusiness }) {
               control={form.control}
               name="askingPrice"
               render={({ field }) => (
-                <FormItem>
+                <FormItem id={publishFieldDomId("askingPrice")}>
                   <FormLabel>{t("business:askingPrice")}</FormLabel>
                   <FormControl>
                     <Input type="number" min={0} step="1" {...field} />

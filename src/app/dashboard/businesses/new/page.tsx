@@ -27,6 +27,8 @@ import {
   isAcceptedImage,
 } from "@/components/business/business-image-manager";
 import { useCategories } from "@/hooks/use-listings";
+import { categoryLabel, orderCategories } from "@/lib/marketplace/categories";
+import { publishFieldDomId } from "@/lib/business/publish-fields";
 import { useCreateBusiness } from "@/hooks/use-businesses";
 import { businessesApi } from "@/lib/api/businesses";
 import { queryKeys } from "@/lib/query/keys";
@@ -54,7 +56,9 @@ export default function NewBusinessPage() {
   const { t } = useTranslation(["business", "errors", "common"]);
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: categories = [], isSuccess: categoriesLoaded } = useCategories();
+  const categoriesQuery = useCategories();
+  const categoriesLoaded = categoriesQuery.isSuccess;
+  const categories = React.useMemo(() => orderCategories(categoriesQuery.data ?? []), [categoriesQuery.data]);
   const noCategories = categoriesLoaded && categories.length === 0;
   const createBusiness = useCreateBusiness();
 
@@ -131,14 +135,14 @@ export default function NewBusinessPage() {
       const business = await createBusiness.mutateAsync({
         name: values.name,
         description: values.description || undefined,
-        categoryId: values.categoryId || undefined,
-        businessModel: values.businessModel || undefined,
+        categoryId: values.categoryId,
+        businessModel: values.businessModel,
         foundedAt: values.foundedAt || undefined,
         country: values.country || undefined,
         city: values.city || undefined,
         website: values.website || undefined,
         headline: values.headline || undefined,
-        askingPrice: amountOrUndefined(values.askingPrice),
+        askingPrice: Number(values.askingPrice),
         currency: values.currency,
         annualRevenue: amountOrUndefined(values.annualRevenue),
       });
@@ -200,7 +204,7 @@ export default function NewBusinessPage() {
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem id={publishFieldDomId("name")}>
                     <FormLabel>{t("businessName")} *</FormLabel>
                     <FormControl>
                       <Input placeholder={t("seller.businessNamePlaceholder")} {...field} />
@@ -228,7 +232,7 @@ export default function NewBusinessPage() {
                 control={form.control}
                 name="description"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem id={publishFieldDomId("description")}>
                     <FormLabel>{t("description")} *</FormLabel>
                     <FormControl>
                       <Textarea rows={6} placeholder={t("seller.descriptionPlaceholder")} {...field} />
@@ -243,7 +247,7 @@ export default function NewBusinessPage() {
                   control={form.control}
                   name="categoryId"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem id={publishFieldDomId("categoryId")}>
                       <FormLabel>{t("industry")} / {t("category")} *</FormLabel>
                       <Select value={field.value} onValueChange={field.onChange} disabled={noCategories}>
                         <FormControl>
@@ -254,7 +258,7 @@ export default function NewBusinessPage() {
                         <SelectContent>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
-                              {category.name}
+                              {categoryLabel(t, category)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -268,7 +272,7 @@ export default function NewBusinessPage() {
                   control={form.control}
                   name="businessModel"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem id={publishFieldDomId("businessModel")}>
                       <FormLabel>{t("businessModel")} *</FormLabel>
                       <FormControl>
                         <Input placeholder={t("seller.businessModelPlaceholder")} {...field} />
@@ -364,7 +368,7 @@ export default function NewBusinessPage() {
                   control={form.control}
                   name="askingPrice"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem id={publishFieldDomId("askingPrice")}>
                       <FormLabel>{t("askingPrice")} *</FormLabel>
                       <FormControl>
                         <Input

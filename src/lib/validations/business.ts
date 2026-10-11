@@ -24,11 +24,17 @@ const optionalAmount = (message: string) =>
  * seller can create a complete, publishable project in one step.
  */
 export const createProjectSchema = createBusinessSchema.extend({
+  // Everything publishing needs is required up front, so a seller never
+  // discovers a missing field only when pressing "Publish".
+  description: z.string().trim().min(1, "validation:descriptionRequired").max(5000),
+  categoryId: z.string().uuid("validation:categoryRequired"),
+  businessModel: z.string().trim().min(1, "validation:businessModelRequired").max(80),
   headline: z.string().max(200).optional().or(z.literal("")),
-  askingPrice: optionalAmount("validation:positiveAmountRequired").refine(
-    (v) => !v || Number(v) > 0,
-    "validation:positiveAmountRequired",
-  ),
+  askingPrice: z
+    .string()
+    .trim()
+    .min(1, "validation:askingPriceRequired")
+    .refine((v) => Number.isFinite(Number(v)) && Number(v) > 0, "validation:positiveAmountRequired"),
   currency: z.string().length(3),
   annualRevenue: optionalAmount("validation:valueMustBeZeroOrGreater"),
 });

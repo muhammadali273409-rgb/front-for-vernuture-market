@@ -30,6 +30,8 @@ export interface ApiErrorBody {
   error: {
     code: string;
     message: string;
+    /** Machine-readable context, e.g. `{ missing: ["categoryId"] }` for LISTING_INCOMPLETE. */
+    details?: unknown;
   };
   requestId?: string;
 }

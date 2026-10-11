@@ -12,5 +12,10 @@
   "periodRequired": "Period is required",
   "amountGreaterThanZero": "Enter an amount greater than zero",
   "messageRequired": "Message can't be empty",
-  "messageTooLong": "Message is too long (max 5000 characters)"
+  "messageTooLong": "Message is too long (max 5000 characters)",
+  "descriptionRequired": "Enter a description",
+  "categoryRequired": "Choose a category",
+  "businessModelRequired": "Enter the business model",
+  "askingPriceRequired": "Enter an asking price",
+  "requiredToPublish": "Required to publish"
 }

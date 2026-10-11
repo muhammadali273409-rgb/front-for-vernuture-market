@@ -12,5 +12,10 @@
   "periodRequired": "Период обязателен",
   "amountGreaterThanZero": "Введите сумму больше нуля",
   "messageRequired": "Сообщение не может быть пустым",
-  "messageTooLong": "Сообщение слишком длинное (максимум 5000 символов)"
+  "messageTooLong": "Сообщение слишком длинное (максимум 5000 символов)",
+  "descriptionRequired": "Введите описание",
+  "categoryRequired": "Выберите категорию",
+  "businessModelRequired": "Укажите бизнес-модель",
+  "askingPriceRequired": "Укажите цену",
+  "requiredToPublish": "Обязательно для публикации"
 }

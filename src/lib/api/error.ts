@@ -5,13 +5,15 @@ export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
   readonly requestId?: string;
+  readonly details?: unknown;
 
-  constructor(status: number, code: string, message: string, requestId?: string) {
+  constructor(status: number, code: string, message: string, requestId?: string, details?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.requestId = requestId;
+    this.details = details;
   }
 }
 
@@ -89,7 +91,7 @@ function messageFromUnknownBody(parsed: unknown): string | undefined {
  */
 export function apiErrorFromResponse(res: Response, parsed: unknown): ApiError {
   if (isApiErrorBody(parsed)) {
-    return new ApiError(res.status, parsed.error.code, parsed.error.message, parsed.requestId);
+    return new ApiError(res.status, parsed.error.code, parsed.error.message, parsed.requestId, parsed.error.details);
   }
   const requestId =
     parsed && typeof parsed === "object" && typeof (parsed as { requestId?: unknown }).requestId === "string"

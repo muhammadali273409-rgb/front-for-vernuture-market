@@ -1,13 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import { AppProviders } from "@/providers/app-providers";
 import { getServerLocale, getT } from "@/i18n/server";
 import { LOCALE_BCP47 } from "@/i18n/settings";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// Inter with the Cyrillic + Cyrillic Extended subsets: Tajik needs ҳ ҷ қ ғ ӣ ӯ,
+// which Geist doesn't have (they used to render in a fallback serif).
+const interSans = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -91,7 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang={LOCALE_BCP47[locale]}
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${interSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AppProviders locale={locale}>{children}</AppProviders>

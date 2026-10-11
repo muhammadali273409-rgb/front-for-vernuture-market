@@ -184,8 +184,8 @@
     "revenue_desc": "Даромади моҳона: аз зиёд ба кам",
     "profit_desc": "Фоидаи моҳона: аз зиёд ба кам"
   },
-  "minPlaceholder": "Ҳадди ақал",
-  "maxPlaceholder": "Ҳадди аксар",
+  "minPlaceholder": "Аз",
+  "maxPlaceholder": "То",
   "rangeInvalid": "Танҳо адади бутун ворид кунед.",
   "rangeInverted": "Ҳадди ақал аз ҳадди аксар зиёд буда наметавонад.",
   "figureVerified": "Тасдиқшуда",
@@ -211,5 +211,9 @@
   "publicListingsCount_one": "{{count}} эълони оммавӣ",
   "publicListingsCount_other": "{{count}} эълони оммавӣ",
   "sellerPrivacyNote": "Маълумоти тамоси фурӯшанда пинҳон аст — аз саҳифаи эълон ба ӯ нависед.",
-  "sellerNotFound": "Фурӯшанда ёфт нашуд"
+  "sellerNotFound": "Фурӯшанда ёфт нашуд",
+  "priceOnRequest": "Нарх бо дархост",
+  "priceNotSet": "Нарх муайян нашудааст",
+  "ownUnpublishedHint": "Ин бизнес ҳоло нашр нашудааст, барои ҳамин харидорон онро намебинанд.",
+  "editAndPublish": "Таҳрир ва нашр кардан"
 }

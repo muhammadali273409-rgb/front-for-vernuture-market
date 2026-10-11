@@ -149,7 +149,7 @@ export function ListingCard({ listing }: ListingCardProps) {
                 <p className="font-mono text-lg font-bold text-foreground">
                   {listing.askingPrice !== null
                     ? formatCompactMoney(listing.askingPrice, listing.currency, locale)
-                    : t("notDisclosed")}
+                    : t("priceOnRequest")}
                 </p>
               </div>
               {listing.publishedAt && (
