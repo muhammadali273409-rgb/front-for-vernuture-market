@@ -17,5 +17,6 @@
   "categoryRequired": "Choose a category",
   "businessModelRequired": "Enter the business model",
   "askingPriceRequired": "Enter an asking price",
-  "requiredToPublish": "Required to publish"
+  "requiredToPublish": "Required to publish",
+  "countryCode": "Use a 2-letter Latin country code, e.g. TJ"
 }

@@ -6,7 +6,12 @@ export const createBusinessSchema = z.object({
   categoryId: z.string().uuid().optional().or(z.literal("")),
   businessModel: z.string().max(80).optional().or(z.literal("")),
   foundedAt: z.string().optional().or(z.literal("")),
-  country: z.string().max(2).optional().or(z.literal("")),
+  // Latin letters only: a Cyrillic "Т" looks like "T" but never matches the country filter.
+  country: z
+    .string()
+    .regex(/^[A-Za-z]{2}$/, "validation:countryCode")
+    .optional()
+    .or(z.literal("")),
   city: z.string().max(100).optional().or(z.literal("")),
   website: z.string().url("validation:invalidUrl").optional().or(z.literal("")),
 });

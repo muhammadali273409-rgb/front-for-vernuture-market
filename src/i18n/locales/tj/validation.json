@@ -17,5 +17,6 @@
   "categoryRequired": "Категорияро интихоб кунед",
   "businessModelRequired": "Модели бизнесро ворид кунед",
   "askingPriceRequired": "Нархи пешниҳодшударо ворид кунед",
-  "requiredToPublish": "Барои нашр ҳатмист"
+  "requiredToPublish": "Барои нашр ҳатмист",
+  "countryCode": "Рамзи кишвар — 2 ҳарфи лотинӣ, масалан TJ"
 }

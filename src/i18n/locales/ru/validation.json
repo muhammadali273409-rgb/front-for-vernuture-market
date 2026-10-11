@@ -17,5 +17,6 @@
   "categoryRequired": "Выберите категорию",
   "businessModelRequired": "Укажите бизнес-модель",
   "askingPriceRequired": "Укажите цену",
-  "requiredToPublish": "Обязательно для публикации"
+  "requiredToPublish": "Обязательно для публикации",
+  "countryCode": "Код страны — 2 латинские буквы, например TJ"
 }
