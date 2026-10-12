@@ -8,18 +8,24 @@ import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useRealtimeStatus } from "@/lib/realtime/socket";
+
+/** While the socket is up, polling is only a slow safety net. */
+const REALTIME_FALLBACK_POLL_MS = 60_000;
 
 /**
- * There's no websocket client in the app, so threads stay fresh by polling;
- * every send/start also invalidates the affected queries right away.
+ * New messages arrive over the realtime socket (see useRealtimeSync); when
+ * it's down, threads stay fresh by polling. Every send/start also
+ * invalidates the affected queries right away.
  */
 export function useConversations() {
   const { data: user } = useCurrentUser();
+  const live = useRealtimeStatus((s) => s.connected);
   return useQuery({
     queryKey: queryKeys.conversations,
     queryFn: () => conversationsApi.list(),
     enabled: Boolean(user),
-    refetchInterval: 15000,
+    refetchInterval: live ? REALTIME_FALLBACK_POLL_MS : 15000,
   });
 }
 
@@ -43,6 +49,7 @@ export function useConversation(id: string) {
 export function useMessages(conversationId: string, options: { enabled?: boolean } = {}) {
   const { data: user } = useCurrentUser();
   const queryClient = useQueryClient();
+  const live = useRealtimeStatus((s) => s.connected);
   return useQuery({
     queryKey: queryKeys.messages(conversationId),
     queryFn: async () => {
@@ -52,7 +59,7 @@ export function useMessages(conversationId: string, options: { enabled?: boolean
       return page;
     },
     enabled: Boolean(conversationId && user) && (options.enabled ?? true),
-    refetchInterval: 5000,
+    refetchInterval: live ? REALTIME_FALLBACK_POLL_MS : 5000,
     retry: false,
     select: (page) => page.data,
   });

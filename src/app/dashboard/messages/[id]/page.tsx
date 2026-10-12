@@ -13,6 +13,7 @@ import { ErrorState } from "@/components/shared/error-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useConversation, useMessages, useSendMessage } from "@/hooks/use-conversations";
+import { useTypingIndicator } from "@/hooks/use-realtime";
 import { formatDateTime } from "@/lib/utils/format";
 import { otherParticipant, participantName } from "@/lib/utils/conversations";
 import { MESSAGE_MAX_LENGTH } from "@/lib/validations/offer";
@@ -31,6 +32,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
   const messagesQuery = useMessages(id, { enabled: conversationQuery.isSuccess });
   const messages = messagesQuery.data ?? [];
   const sendMessage = useSendMessage(id);
+  const { isOtherTyping, notifyTyping } = useTypingIndicator(id, user?.id);
   const [body, setBody] = React.useState("");
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -137,10 +139,17 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
             )}
           </ScrollArea>
 
+          <p aria-live="polite" className="h-5 px-4 text-xs italic text-muted-foreground">
+            {isOtherTyping ? t("typing", { name: otherName }) : null}
+          </p>
+
           <div className="flex items-end gap-2 border-t p-3">
             <Textarea
               value={body}
-              onChange={(e) => setBody(e.target.value)}
+              onChange={(e) => {
+                setBody(e.target.value);
+                if (e.target.value.trim()) notifyTyping();
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();

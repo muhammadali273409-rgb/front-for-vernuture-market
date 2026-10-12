@@ -105,20 +105,24 @@ export const dealTaskStatusKey: Record<string, string> = {
   COMPLETED: "completed",
 };
 
-/** Document visibility (`documents:visibility.*`). */
+/** Document visibility — backend DocumentVisibility enum (`documents:visibility.*`). */
 export const documentVisibilityKey: Record<string, string> = {
-  NDA_REQUIRED: "ndaRequired",
-  DEAL_ROOM_ONLY: "dealRoomOnly",
-  PUBLIC: "public",
+  PRIVATE: "private",
+  DEAL_PARTICIPANTS: "dealParticipants",
+  ORGANIZATION: "organization",
 };
 
-/** Document category, as used on the dashboard documents page (`documents:category.*`). */
+/** Document category — backend DocumentCategory enum (`documents:category.*`). */
 export const documentCategoryKey: Record<string, string> = {
-  Financial: "financial",
-  Technical: "technical",
-  Legal: "legal",
-  Teaser: "teaser",
+  FINANCIAL: "financial",
+  LEGAL: "legal",
+  TECHNICAL: "technical",
+  MARKETING: "marketing",
+  OPERATIONS: "operations",
+  OTHER: "other",
 };
+
+export const DOCUMENT_CATEGORIES = Object.keys(documentCategoryKey);
 
 /** Due-diligence checklist category, dashboard due-diligence page (`deals:categories.*`). */
 export const dueDiligenceCategoryKey: Record<string, string> = {

@@ -66,6 +66,14 @@ export const authApi = {
       skipAuthRetry: true,
     }),
 
+  /** Always succeeds (doesn't reveal whether the account exists); at most one email per minute. */
+  resendVerification: (email: string) =>
+    apiFetch<{ success: boolean; message: string }>("/auth/resend-verification", {
+      method: "POST",
+      body: { email },
+      skipAuthRetry: true,
+    }),
+
   forgotPassword: (email: string) =>
     apiFetch<{ success: boolean; message: string }>("/auth/forgot-password", {
       method: "POST",

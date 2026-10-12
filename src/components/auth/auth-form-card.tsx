@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLogin, useRegister, useGoogleLogin } from "@/hooks/use-auth-mutations";
 import { ApiError, friendlyErrorMessage } from "@/lib/api/error";
 import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { ResendVerificationButton } from "@/components/auth/resend-verification-button";
 import { GoogleRoleSelectDialog } from "@/components/auth/google-role-select-dialog";
 import { RoleChoiceCards } from "@/components/onboarding/role-choice-cards";
 import {
@@ -416,6 +417,11 @@ export function AuthFormCard({
             <p className="text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
               {t("auth:registrationSuccessDescription")}
             </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-xs text-muted-foreground">{t("auth:verifyBanner.noEmail")}</p>
+            <ResendVerificationButton email={registerEmail} />
           </div>
 
           <Button

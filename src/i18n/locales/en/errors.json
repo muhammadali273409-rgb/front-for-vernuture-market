@@ -2,6 +2,7 @@
   "NETWORK_ERROR": "Network error. Check your connection and try again.",
   "SERVER_UNREACHABLE": "The server didn't respond. Please try again in a minute.",
   "DATABASE_UNAVAILABLE": "The server didn't respond. Please try again in a minute.",
+  "STORAGE_UNAVAILABLE": "File storage is temporarily unavailable. Please try again later.",
   "UNAUTHORIZED": "You need to log in to continue.",
   "FORBIDDEN": "You don't have permission to do this.",
   "NOT_FOUND": "We couldn't find what you're looking for.",

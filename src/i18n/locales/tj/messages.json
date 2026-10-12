@@ -21,6 +21,7 @@
   "noConversationsYet": "То ҳол гуфтугӯ нест",
   "noConversationsYetDescription": "Ба фурӯшанда аз эълон паём фиристед, то гуфтугӯро сар кунед.",
   "noMessagesYet": "То ҳол паём нест",
+  "typing": "{{name}} менависад…",
   "writeMessagePlaceholder": "Паём нависед…",
   "roleBuyer": "Харидор",
   "roleSeller": "Фурӯшанда",

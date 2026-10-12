@@ -21,6 +21,7 @@
   "noConversationsYet": "Пока нет переписок",
   "noConversationsYetDescription": "Напишите продавцу с объявления, чтобы начать переписку.",
   "noMessagesYet": "Пока нет сообщений",
+  "typing": "{{name}} печатает…",
   "writeMessagePlaceholder": "Напишите сообщение…",
   "roleBuyer": "Покупатель",
   "roleSeller": "Продавец",

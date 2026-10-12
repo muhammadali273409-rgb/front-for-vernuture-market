@@ -24,13 +24,19 @@
   "visibility": {
     "ndaRequired": "NDA required",
     "dealRoomOnly": "Deal room only",
-    "public": "Public"
+    "public": "Public",
+    "private": "Private",
+    "dealParticipants": "Deal participants",
+    "organization": "Organization"
   },
   "category": {
     "financial": "Financial",
     "technical": "Technical",
     "legal": "Legal",
-    "teaser": "Teaser"
+    "teaser": "Teaser",
+    "marketing": "Marketing",
+    "operations": "Operations",
+    "other": "Other"
   },
   "pageTitle": "Secure Document Center",
   "pageDescription": "Encrypted, watermarked data rooms for P&L statements, tax returns, IP assignments, and technical topologies.",
@@ -45,5 +51,13 @@
   "dataRoomFilesPermissions": "Data Room Files & Permissions",
   "filesWatermarkedDescription": "Files are automatically watermarked with the viewer's IP, timestamp, and legal entity identifier",
   "categoryLabel": "Category:",
-  "versionNumber": "Version {{version}}"
+  "versionNumber": "Version {{version}}",
+  "upload": {
+    "business": "Business",
+    "category": "Category",
+    "allowedFiles": "PDF, Word, Excel, CSV, image or ZIP · up to 25 MB",
+    "blockedNoBusiness": "Add your business first to upload documents.",
+    "blockedLoadFailed": "Your businesses couldn't be loaded, so uploading is unavailable right now.",
+    "addBusiness": "Add a business"
+  }
 }

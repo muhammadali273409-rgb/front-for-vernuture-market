@@ -20,12 +20,12 @@ import {
   useUploadDocument,
 } from "@/hooks/use-documents";
 import { formatDate } from "@/lib/utils/format";
+import { DOCUMENT_CATEGORIES, documentCategoryKey } from "@/lib/utils/labels";
 import { toast } from "sonner";
 import { friendlyErrorMessage } from "@/lib/api/error";
 import { useTranslation } from "@/i18n/client";
 import type { Locale } from "@/i18n/settings";
 
-const CATEGORIES = ["FINANCIAL", "LEGAL", "TECHNICAL", "MARKETING", "OPERATIONS", "OTHER"];
 
 export function DocumentManager({ businessId }: { businessId: string }) {
   const { t, i18n } = useTranslation(["documents", "errors"]);
@@ -59,9 +59,9 @@ export function DocumentManager({ businessId }: { businessId: string }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {CATEGORIES.map((c) => (
+            {DOCUMENT_CATEGORIES.map((c) => (
               <SelectItem key={c} value={c}>
-                {c.charAt(0) + c.slice(1).toLowerCase()}
+                {t(`documents:category.${documentCategoryKey[c]}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -93,9 +93,10 @@ export function DocumentManager({ businessId }: { businessId: string }) {
               <div className="flex min-w-0 items-center gap-2">
                 <FileText className="size-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
-                  <p className="truncate font-medium">{doc.fileName}</p>
+                  <p className="truncate font-medium">{doc.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {doc.category} · {t("documents:uploadedOn", { date: formatDate(doc.createdAt, locale) })}
+                    {t(`documents:category.${documentCategoryKey[doc.category] ?? "other"}`)} ·{" "}
+                    {t("documents:uploadedOn", { date: formatDate(doc.createdAt, locale) })}
                   </p>
                 </div>
               </div>

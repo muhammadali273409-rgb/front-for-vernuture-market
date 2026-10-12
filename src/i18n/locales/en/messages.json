@@ -21,6 +21,7 @@
   "noConversationsYet": "No conversations yet",
   "noConversationsYetDescription": "Message a seller from a listing to start one.",
   "noMessagesYet": "No messages yet",
+  "typing": "{{name}} is typing…",
   "writeMessagePlaceholder": "Write a message…",
   "roleBuyer": "Buyer",
   "roleSeller": "Seller",

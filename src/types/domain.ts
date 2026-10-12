@@ -390,12 +390,17 @@ export interface BusinessDocument {
   id: string;
   businessId: string;
   dealId: string | null;
+  /** FINANCIAL | LEGAL | TECHNICAL | MARKETING | OPERATIONS | OTHER */
   category: string;
+  /** PRIVATE | DEAL_PARTICIPANTS | ORGANIZATION */
   visibility: string;
-  fileName: string;
+  /** Original file name. */
+  name: string;
+  mimeType: string;
+  /** Bytes. */
+  size: number;
   uploadedById: string;
   uploadedBy?: OfferParty;
-  version: number;
   createdAt: string;
 }
 

@@ -24,13 +24,19 @@
   "visibility": {
     "ndaRequired": "Требуется NDA",
     "dealRoomOnly": "Только комната сделки",
-    "public": "Публично"
+    "public": "Публично",
+    "private": "Приватный",
+    "dealParticipants": "Участники сделки",
+    "organization": "Организация"
   },
   "category": {
     "financial": "Финансовый",
     "technical": "Технический",
     "legal": "Юридический",
-    "teaser": "Тизер"
+    "teaser": "Тизер",
+    "marketing": "Маркетинг",
+    "operations": "Операции",
+    "other": "Другое"
   },
   "pageTitle": "Центр защищённых документов",
   "pageDescription": "Зашифрованные, помеченные водяными знаками комнаты данных для отчётов о прибылях и убытках, налоговых деклараций, передачи прав ИС и технической документации.",
@@ -45,5 +51,13 @@
   "dataRoomFilesPermissions": "Файлы и права доступа комнаты данных",
   "filesWatermarkedDescription": "Файлы автоматически помечаются IP-адресом, временной меткой и юридическим лицом просматривающего",
   "categoryLabel": "Категория:",
-  "versionNumber": "Версия {{version}}"
+  "versionNumber": "Версия {{version}}",
+  "upload": {
+    "business": "Бизнес",
+    "category": "Категория",
+    "allowedFiles": "PDF, Word, Excel, CSV, изображение или ZIP · до 25 МБ",
+    "blockedNoBusiness": "Чтобы загрузить документ, сначала добавьте свой бизнес.",
+    "blockedLoadFailed": "Не удалось загрузить список ваших бизнесов, поэтому загрузка документов сейчас недоступна.",
+    "addBusiness": "Добавить бизнес"
+  }
 }

@@ -223,10 +223,9 @@ export function DealRoomView({ deal }: { deal: Deal }) {
                         <FileText className="size-4" />
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground">{doc.fileName}</p>
+                        <p className="font-semibold text-foreground">{doc.name}</p>
                         <p className="text-[11px] text-muted-foreground">
                           {t("documents:categoryLabel")} {t(`documents:category.${documentCategoryKey[doc.category] ?? doc.category}`)} ·{" "}
-                          {t("documents:versionNumber", { version: doc.version })} ·{" "}
                           {t("documents:uploadedOn", { date: formatDate(doc.createdAt, locale) })}
                         </p>
                       </div>

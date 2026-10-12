@@ -24,13 +24,19 @@
   "visibility": {
     "ndaRequired": "NDA лозим аст",
     "dealRoomOnly": "Танҳо утоқи муомила",
-    "public": "Оммавӣ"
+    "public": "Оммавӣ",
+    "private": "Хусусӣ",
+    "dealParticipants": "Иштирокчиёни муомила",
+    "organization": "Ташкилот"
   },
   "category": {
     "financial": "Молиявӣ",
     "technical": "Техникӣ",
     "legal": "Ҳуқуқӣ",
-    "teaser": "Тизер"
+    "teaser": "Тизер",
+    "marketing": "Маркетинг",
+    "operations": "Амалиёт",
+    "other": "Дигар"
   },
   "pageTitle": "Маркази ҳифзшудаи ҳуҷҷатҳо",
   "pageDescription": "Утоқҳои маълумоти рамзгузоришуда бо тамғаи об барои ҳисоботҳои фоида ва зарар, эъломияҳои андоз, интиқоли ҳуқуқи моликияти зеҳнӣ ва топологияи техникӣ.",
@@ -45,5 +51,13 @@
   "dataRoomFilesPermissions": "Файлҳо ва иҷозатҳои утоқи маълумот",
   "filesWatermarkedDescription": "Файлҳо ба таври худкор бо IP, вақт ва шахси ҳуқуқии бинанда тамғагузорӣ мешаванд",
   "categoryLabel": "Категория:",
-  "versionNumber": "Версияи {{version}}"
+  "versionNumber": "Версияи {{version}}",
+  "upload": {
+    "business": "Бизнес",
+    "category": "Категория",
+    "allowedFiles": "PDF, Word, Excel, CSV, тасвир ё ZIP · то 25 МБ",
+    "blockedNoBusiness": "Барои боркунии ҳуҷҷат аввал бизнеси худро илова кунед.",
+    "blockedLoadFailed": "Рӯйхати бизнесҳои шумо бор нашуд, барои ҳамин ҳуҷҷат бор кардан ҳоло ғайриимкон аст.",
+    "addBusiness": "Илова кардани бизнес"
+  }
 }
