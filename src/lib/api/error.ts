@@ -6,14 +6,24 @@ export class ApiError extends Error {
   readonly code: string;
   readonly requestId?: string;
   readonly details?: unknown;
+  /** Per-field messages from the backend, e.g. `{ email: "...", password: "..." }`. */
+  readonly fields?: Record<string, string>;
 
-  constructor(status: number, code: string, message: string, requestId?: string, details?: unknown) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    requestId?: string,
+    details?: unknown,
+    fields?: Record<string, string>,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
     this.requestId = requestId;
     this.details = details;
+    this.fields = fields;
   }
 }
 
@@ -52,7 +62,8 @@ export function friendlyErrorMessage(
       return error.message;
     }
     const key = ERROR_CODE_ALIASES[error.code] ?? error.code;
-    return t(`errors:${key}`, { defaultValue: t("errors:UNKNOWN_ERROR") });
+    const fallback = error.status >= 500 ? "errors:SERVER_ERROR" : "errors:UNKNOWN_ERROR";
+    return t(`errors:${key}`, { defaultValue: t(fallback) });
   }
   if (error instanceof Error && (error.message === "Failed to fetch" || error.name === "TypeError")) {
     return t("errors:NETWORK_ERROR");
@@ -91,7 +102,14 @@ function messageFromUnknownBody(parsed: unknown): string | undefined {
  */
 export function apiErrorFromResponse(res: Response, parsed: unknown): ApiError {
   if (isApiErrorBody(parsed)) {
-    return new ApiError(res.status, parsed.error.code, parsed.error.message, parsed.requestId, parsed.error.details);
+    return new ApiError(
+      res.status,
+      parsed.error.code,
+      parsed.error.message,
+      parsed.requestId,
+      parsed.error.details,
+      parsed.error.fields,
+    );
   }
   const requestId =
     parsed && typeof parsed === "object" && typeof (parsed as { requestId?: unknown }).requestId === "string"

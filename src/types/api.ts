@@ -32,6 +32,8 @@ export interface ApiErrorBody {
     message: string;
     /** Machine-readable context, e.g. `{ missing: ["categoryId"] }` for LISTING_INCOMPLETE. */
     details?: unknown;
+    /** Per-field messages for validation (400) and uniqueness (409) failures. */
+    fields?: Record<string, string>;
   };
   requestId?: string;
 }

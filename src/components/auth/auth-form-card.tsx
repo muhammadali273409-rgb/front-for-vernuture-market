@@ -64,17 +64,62 @@ const KNOWN_ERROR_CODES = new Set([
   "VALIDATION_ERROR",
   "RATE_LIMITED",
   "SERVER_ERROR",
+  "DATABASE_UNAVAILABLE",
 ]);
 
 function translateAuthError(error: unknown, t: TFunction): string {
   if (error instanceof ApiError) {
-    const code = KNOWN_ERROR_CODES.has(error.code) ? error.code : "UNKNOWN_ERROR";
+    const fallback = error.status >= 500 ? "SERVER_ERROR" : "UNKNOWN_ERROR";
+    const code = KNOWN_ERROR_CODES.has(error.code) ? error.code : fallback;
     return t(`errors:${code}`);
   }
   if (error instanceof Error && (error.message === "Failed to fetch" || error.name === "TypeError")) {
     return t("errors:NETWORK_ERROR");
   }
   return t("errors:UNKNOWN_ERROR");
+}
+
+/** Must match RegisterDto's @MinLength on the backend. */
+const PASSWORD_MIN_LENGTH = 10;
+
+type RegisterField = "name" | "email" | "password" | "confirmPassword";
+type RegisterFieldErrors = Partial<Record<RegisterField, string>>;
+
+const BACKEND_FIELD_TO_INPUT: Record<string, RegisterField> = {
+  firstName: "name",
+  lastName: "name",
+  email: "email",
+  password: "password",
+};
+
+/**
+ * Per-input messages for a failed sign-up: 409 email taken, or the backend's
+ * 400 `error.fields`. Known cases are translated; anything else shows the
+ * backend's own message under the input it belongs to.
+ */
+function registerFieldErrors(error: unknown, t: TFunction): RegisterFieldErrors {
+  if (!(error instanceof ApiError)) return {};
+  if (error.code === "AUTH_EMAIL_TAKEN") return { email: t("errors:AUTH_EMAIL_TAKEN") };
+
+  const result: RegisterFieldErrors = {};
+  for (const [field, message] of Object.entries(error.fields ?? {})) {
+    const input = BACKEND_FIELD_TO_INPUT[field];
+    if (!input || result[input]) continue;
+    if (input === "email") result.email = t("auth:validation.emailInvalid");
+    else if (input === "password" && /longer than/i.test(message))
+      result.password = t("auth:validation.passwordTooShort", { min: PASSWORD_MIN_LENGTH });
+    else result[input] = message;
+  }
+  return result;
+}
+
+function FieldError({ id, message }: { id: string; message?: string }) {
+  if (!message) return null;
+  return (
+    <p id={id} role="alert" className="-mt-2 px-1 text-[11px] font-medium text-destructive">
+      {message}
+    </p>
+  );
 }
 
 export function AuthFormCard({
@@ -121,6 +166,11 @@ export function AuthFormCard({
   const [registerEmail, setRegisterEmail] = React.useState("");
   const [registerPassword, setRegisterPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [fieldErrors, setFieldErrors] = React.useState<RegisterFieldErrors>({});
+
+  function clearFieldError(field: RegisterField) {
+    setFieldErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  }
 
   const { t } = useTranslation(["auth", "common"] as const);
   const loginMutation = useLogin();
@@ -237,6 +287,7 @@ export function AuthFormCard({
   function handleRegisterSubmit(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
+    setFieldErrors({});
 
     if (!selectedRole) {
       setFormError(t("auth:roleChoice.required"));
@@ -248,8 +299,13 @@ export function AuthFormCard({
       return;
     }
 
+    if (registerPassword.length < PASSWORD_MIN_LENGTH) {
+      setFieldErrors({ password: t("auth:validation.passwordTooShort", { min: PASSWORD_MIN_LENGTH }) });
+      return;
+    }
+
     if (registerPassword !== confirmPassword) {
-      setFormError(t("auth:validation.passwordsDoNotMatch"));
+      setFieldErrors({ confirmPassword: t("auth:validation.passwordsDoNotMatch") });
       return;
     }
 
@@ -274,7 +330,13 @@ export function AuthFormCard({
           setIsSuccessState(true);
         },
         onError: (error) => {
-          // Surface the backend's validation reason (e.g. password length).
+          console.error("[AuthFormCard] Registration failed", error);
+          // Email taken / per-field validation → shown under the input itself.
+          const fields = registerFieldErrors(error, t);
+          if (Object.keys(fields).length > 0) {
+            setFieldErrors(fields);
+            return;
+          }
           setFormError(friendlyErrorMessage(error, t, { showValidationDetail: true }));
         },
       },
@@ -531,11 +593,17 @@ export function AuthFormCard({
                   type="text"
                   placeholder={t("auth:fullName")}
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    clearFieldError("name");
+                  }}
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  aria-describedby={fieldErrors.name ? "register-name-error" : undefined}
                   className="h-10.5 rounded-xl pl-10 text-xs font-medium border-border/80 focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-all"
                   required
                 />
               </div>
+              <FieldError id="register-name-error" message={fieldErrors.name} />
 
               {/* Email Address */}
               <div className="relative group">
@@ -546,11 +614,17 @@ export function AuthFormCard({
                   type="email"
                   placeholder={t("auth:emailAddress")}
                   value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  onChange={(e) => {
+                    setRegisterEmail(e.target.value);
+                    clearFieldError("email");
+                  }}
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={fieldErrors.email ? "register-email-error" : undefined}
                   className="h-10.5 rounded-xl pl-10 text-xs font-medium border-border/80 focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-all"
                   required
                 />
               </div>
+              <FieldError id="register-email-error" message={fieldErrors.email} />
 
               {/* Password */}
               <div className="relative group">
@@ -561,7 +635,12 @@ export function AuthFormCard({
                   type={showPassword ? "text" : "password"}
                   placeholder={t("auth:password")}
                   value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  onChange={(e) => {
+                    setRegisterPassword(e.target.value);
+                    clearFieldError("password");
+                  }}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  aria-describedby={fieldErrors.password ? "register-password-error" : undefined}
                   className="h-10.5 rounded-xl pl-10 pr-10 text-xs font-medium border-border/80 focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-all"
                   required
                 />
@@ -574,6 +653,7 @@ export function AuthFormCard({
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
+              <FieldError id="register-password-error" message={fieldErrors.password} />
 
               {/* Confirm Password */}
               <div className="relative group">
@@ -584,7 +664,12 @@ export function AuthFormCard({
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder={t("auth:confirmPassword")}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    clearFieldError("confirmPassword");
+                  }}
+                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                  aria-describedby={fieldErrors.confirmPassword ? "register-confirm-error" : undefined}
                   className="h-10.5 rounded-xl pl-10 pr-10 text-xs font-medium border-border/80 focus-visible:ring-2 focus-visible:ring-blue-500/30 focus-visible:border-blue-500 transition-all"
                   required
                 />
@@ -597,6 +682,7 @@ export function AuthFormCard({
                   {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
+              <FieldError id="register-confirm-error" message={fieldErrors.confirmPassword} />
 
               {/* Create Account Button with 2026 Shimmer and Magnetic Glow */}
               <Button

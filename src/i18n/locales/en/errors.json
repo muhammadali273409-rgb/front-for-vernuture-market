@@ -1,6 +1,7 @@
 {
   "NETWORK_ERROR": "Network error. Check your connection and try again.",
   "SERVER_UNREACHABLE": "The server didn't respond. Please try again in a minute.",
+  "DATABASE_UNAVAILABLE": "The server didn't respond. Please try again in a minute.",
   "UNAUTHORIZED": "You need to log in to continue.",
   "FORBIDDEN": "You don't have permission to do this.",
   "NOT_FOUND": "We couldn't find what you're looking for.",
@@ -17,7 +18,7 @@
   "UPLOAD_FAILED": "The file could not be uploaded.",
   "INVALID_FILE": "This file type or size isn't supported.",
   "AUTH_INVALID_CREDENTIALS": "Incorrect email or password.",
-  "AUTH_EMAIL_TAKEN": "An account with this email already exists.",
+  "AUTH_EMAIL_TAKEN": "This email is already in use.",
   "AUTH_EMAIL_NOT_VERIFIED": "Please verify your email address before continuing.",
   "AUTH_ACCOUNT_SUSPENDED": "This account is not active.",
   "AUTH_UNAUTHORIZED": "Your session has expired. Please sign in again.",
