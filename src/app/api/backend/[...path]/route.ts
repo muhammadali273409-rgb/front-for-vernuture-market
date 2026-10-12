@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/config/env";
 import { parseSetCookie } from "@/lib/api/set-cookie";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 /**
  * Same-origin proxy to the real backend (a different registrable domain —
@@ -29,12 +30,13 @@ async function proxy(request: NextRequest, path: string[]): Promise<NextResponse
 
   let backendRes: Response;
   try {
-    backendRes = await fetch(targetUrl, {
+    backendRes = await fetchWithRetry(targetUrl, {
       method: request.method,
       headers,
       body: body && body.byteLength > 0 ? body : undefined,
     });
-  } catch {
+  } catch (error) {
+    console.error(`[api/backend] ${request.method} ${targetUrl} failed`, error);
     return NextResponse.json(
       { error: { code: "NETWORK_ERROR", message: "Could not reach the backend" } },
       { status: 502 },

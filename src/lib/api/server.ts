@@ -2,6 +2,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import { env } from "@/lib/config/env";
 import { apiErrorFromResponse, unwrapEnvelope } from "@/lib/api/error";
+import { fetchWithRetry, parseJsonSafe } from "@/lib/api/fetch-with-retry";
 
 interface ServerFetchOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
@@ -22,7 +23,7 @@ export async function serverApiFetch<T>(
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 
-  const res = await fetch(`${env.apiUrl}${path}`, {
+  const res = await fetchWithRetry(`${env.apiUrl}${path}`, {
     ...rest,
     cache: rest.cache ?? "no-store",
     headers: {
@@ -37,8 +38,7 @@ export async function serverApiFetch<T>(
     return undefined as T;
   }
 
-  const text = await res.text();
-  const parsed = text ? JSON.parse(text) : null;
+  const parsed = parseJsonSafe(await res.text());
 
   if (!res.ok) {
     throw apiErrorFromResponse(res, parsed);

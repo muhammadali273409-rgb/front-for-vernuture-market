@@ -16,6 +16,7 @@ import { formatCompactMoney } from "@/lib/utils/format";
 import { getMetricValue } from "@/lib/utils/metrics";
 import { getT, getServerLocale } from "@/i18n/server";
 import type { ApiFetcher } from "@/lib/api/fetcher-type";
+import type { ListingSummary } from "@/types/domain";
 import type { Metadata } from "next";
 
 // Home uses an absolute title (no "· VentureMarket" suffix), so it composes
@@ -32,13 +33,28 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/**
+ * Featured listings are a nice-to-have on the home page — if the backend is
+ * asleep, waking up, or erroring, render the page without them instead of
+ * sending every visitor to the error boundary.
+ */
+async function getFeaturedListings(): Promise<ListingSummary[]> {
+  try {
+    const result = await listingsApi.search(
+      { limit: 6, sortBy: "createdAt", sortDir: "desc" },
+      publicApiFetch as unknown as ApiFetcher,
+    );
+    return Array.isArray(result?.data) ? result.data : [];
+  } catch (error) {
+    console.error("[HomePage] Failed to load featured listings", error);
+    return [];
+  }
+}
+
 export default async function HomePage() {
   const t = await getT("home");
   const locale = await getServerLocale();
-  const { data: featuredListings } = await listingsApi.search(
-    { limit: 6, sortBy: "createdAt", sortDir: "desc" },
-    publicApiFetch as unknown as ApiFetcher,
-  );
+  const featuredListings = await getFeaturedListings();
   const spotlight = featuredListings[0];
   const spotlightMrr = spotlight ? (spotlight.monthlyRevenue ?? getMetricValue(spotlight.metrics, "MRR")) : null;
   const checklistItems = [1, 2, 3, 4, 5, 6] as const;

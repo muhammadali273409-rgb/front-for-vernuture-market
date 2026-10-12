@@ -18,7 +18,7 @@ export default function GlobalError({
   retry: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    console.error("[GlobalErrorBoundary]", error);
   }, [error]);
 
   return (
@@ -45,7 +45,9 @@ export default function GlobalError({
               Something went wrong
             </h1>
             <p style={{ color: "#6b7280", maxWidth: "24rem", marginTop: "0.5rem" }}>
-              An unexpected error occurred while loading VentureMarket. Please try again.
+              {process.env.NODE_ENV === "development"
+                ? error.message
+                : "An unexpected error occurred while loading VentureMarket. Please try again."}
             </p>
           </div>
           <button

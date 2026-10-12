@@ -1,5 +1,6 @@
 import { env } from "@/lib/config/env";
 import { apiErrorFromResponse, unwrapEnvelope } from "@/lib/api/error";
+import { fetchWithRetry, parseJsonSafe } from "@/lib/api/fetch-with-retry";
 
 interface PublicFetchOptions {
   revalidate?: number | false;
@@ -11,12 +12,11 @@ interface PublicFetchOptions {
  * viewer's cookies — unlike `serverApiFetch`, which always forwards them.
  */
 export async function publicApiFetch<T>(path: string, options: PublicFetchOptions = {}): Promise<T> {
-  const res = await fetch(`${env.apiUrl}${path}`, {
+  const res = await fetchWithRetry(`${env.apiUrl}${path}`, {
     next: { revalidate: options.revalidate ?? 60 },
   });
 
-  const text = await res.text();
-  const parsed = text ? JSON.parse(text) : null;
+  const parsed = parseJsonSafe(await res.text());
 
   if (!res.ok) {
     throw apiErrorFromResponse(res, parsed);
