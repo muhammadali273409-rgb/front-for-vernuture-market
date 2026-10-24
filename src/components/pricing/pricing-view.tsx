@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/client";
+import { friendlyErrorMessage } from "@/lib/api/error";
 import { formatDate } from "@/i18n/format";
 import type { Locale } from "@/i18n/settings";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -143,7 +144,7 @@ export function PricingView() {
           toast.success(t("toasts.planActivated", { plan: planName("FREE") }));
           setFreeConfirmVisible(true);
         },
-        onError: () => toast.error(t("common:somethingWentWrong")),
+        onError: (error) => toast.error(friendlyErrorMessage(error, t)),
       });
       return;
     }

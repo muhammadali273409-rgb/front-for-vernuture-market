@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useAdminBusinesses, useAdminAuditLogs, useAdminUsers, useApproveBusiness, useRejectBusiness } from "@/hooks/use-admin";
 import { formatCompactMoney, formatRelativeTime } from "@/lib/utils/format";
 import { useTranslation } from "@/i18n/client";
+import { friendlyErrorMessage } from "@/lib/api/error";
 import { toast } from "sonner";
 
 export default function AdminDashboardPage() {
@@ -26,7 +27,7 @@ export default function AdminDashboardPage() {
       { id },
       {
         onSuccess: () => toast.success(t("toastApproved") + `: ${name}`),
-        onError: () => toast.error(t("unableToLoad")),
+        onError: (error) => toast.error(friendlyErrorMessage(error, t)),
       },
     );
   }
@@ -36,7 +37,7 @@ export default function AdminDashboardPage() {
       { id },
       {
         onSuccess: () => toast.success(t("toastRejected") + `: ${name}`),
-        onError: () => toast.error(t("unableToLoad")),
+        onError: (error) => toast.error(friendlyErrorMessage(error, t)),
       },
     );
   }

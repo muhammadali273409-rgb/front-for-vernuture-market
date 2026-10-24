@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/client";
+import { friendlyErrorMessage } from "@/lib/api/error";
 import { formatDate } from "@/i18n/format";
 import type { Locale } from "@/i18n/settings";
 import { useCancelSubscription } from "@/hooks/use-subscription";
@@ -49,8 +50,8 @@ export function CancelSubscriptionDialog({
         onOpenChange(false);
         onCancelled?.();
       },
-      onError: () => {
-        toast.error(t("common:somethingWentWrong"));
+      onError: (error) => {
+        toast.error(friendlyErrorMessage(error, t));
       },
     });
   }
