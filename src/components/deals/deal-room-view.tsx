@@ -206,7 +206,7 @@ export function DealRoomView({ deal }: { deal: Deal }) {
 
       {/* Main Tabs Workspace */}
       <Tabs value={tab} onValueChange={selectTab} className="space-y-4">
-        <TabsList className="flex h-auto w-full flex-wrap justify-start sm:w-auto sm:inline-flex">
+        <TabsList className="w-full max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="diligence">{t("dueDiligenceTab", { percent: progress.percent })}</TabsTrigger>
           <TabsTrigger value="agreement">{t("flow.tabs.agreement")}</TabsTrigger>
           <TabsTrigger value="payment">{t("flow.tabs.payment")}</TabsTrigger>
