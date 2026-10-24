@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Briefcase, ShieldCheck, Flag, ScrollText } from "lucide-react";
+import { LayoutDashboard, Users, Briefcase, ShieldCheck, Flag, ScrollText, Landmark } from "lucide-react";
 import { useTranslation } from "@/i18n/client";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ const ADMIN_LINKS = [
   { href: "/admin", icon: LayoutDashboard, labelKey: "overview" },
   { href: "/admin/users", icon: Users, labelKey: "users" },
   { href: "/admin/businesses", icon: Briefcase, labelKey: "businesses" },
+  { href: "/admin/payments", icon: Landmark, labelKey: "payments" },
   { href: "/admin/verification", icon: ShieldCheck, labelKey: "verification" },
   { href: "/admin/reports", icon: Flag, labelKey: "reports" },
   { href: "/admin/audit", icon: ScrollText, labelKey: "auditLogs" },

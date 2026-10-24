@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi, type AdminCursorParams } from "@/lib/api/admin";
 import { queryKeys } from "@/lib/query/keys";
-import type { BusinessStatus } from "@/types/domain";
+import type { BusinessStatus, TransactionStatus } from "@/types/domain";
 
 export function useAdminUsers(params: AdminCursorParams = {}) {
   return useQuery({
@@ -60,4 +60,28 @@ export function useRejectBusiness() {
 
 export function useSuspendBusiness() {
   return useBusinessModerationMutation(adminApi.suspendBusiness);
+}
+
+export function useAdminTransactions(status?: TransactionStatus) {
+  return useQuery({
+    queryKey: queryKeys.adminTransactions(status),
+    queryFn: () => adminApi.listTransactions(status),
+  });
+}
+
+function useTransactionDecision(action: (id: string) => Promise<unknown>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => action(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin", "transactions"] }),
+  });
+}
+
+/** Funds arrived — the only way a manual payment moves the deal to TRANSFER. */
+export function useConfirmTransaction() {
+  return useTransactionDecision(adminApi.confirmTransaction);
+}
+
+export function useRejectTransaction() {
+  return useTransactionDecision((id) => adminApi.rejectTransaction(id));
 }

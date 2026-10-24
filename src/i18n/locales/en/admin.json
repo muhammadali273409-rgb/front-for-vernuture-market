@@ -87,5 +87,23 @@
     "suspendDescription": "This immediately unpublishes the listing.",
     "reasonLabel": "Reason (optional)",
     "reasonPlaceholder": "Add context for this decision…"
+  },
+  "payments": "Payments",
+  "paymentsPage": {
+    "title": "Deal payments",
+    "description": "Manual payments (bank transfer). Confirm once the funds have arrived — the deal then moves to handover.",
+    "empty": "No payments in this status",
+    "buyer": "Buyer",
+    "seller": "Seller",
+    "amount": "Amount",
+    "markedPaid": "Marked by buyer",
+    "confirm": "Funds received",
+    "reject": "Funds not received",
+    "confirmTitle": "Confirm the funds arrived?",
+    "confirmDescription": "{{amount}} for “{{business}}”. The deal moves to business handover. This cannot be undone.",
+    "rejectTitle": "Reject this payment?",
+    "rejectDescription": "The {{amount}} payment for “{{business}}” goes back to the buyer to check and mark again.",
+    "toastConfirmed": "Payment confirmed. The deal moved to handover.",
+    "toastRejected": "Payment sent back to the buyer."
   }
 }

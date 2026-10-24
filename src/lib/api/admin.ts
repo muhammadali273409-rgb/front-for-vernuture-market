@@ -7,6 +7,8 @@ import type {
   Deal,
   DealStatus,
   ListingStatus,
+  Transaction,
+  TransactionStatus,
   UserRole,
   VerificationStatus,
   VerificationType,
@@ -70,6 +72,16 @@ export interface AdminAuditLogSummary {
   createdAt: string;
 }
 
+/** A manual deal payment in the admin confirmation queue. */
+export interface AdminTransaction extends Transaction {
+  deal: {
+    id: string;
+    status: DealStatus;
+    business: { id: string; name: string };
+    participants: { role: "BUYER" | "SELLER"; user: { id: string; email: string } }[];
+  };
+}
+
 export const adminApi = {
   listUsers: (params: AdminCursorParams = {}) =>
     apiFetch<ApiPaginated<AdminUserSummary>>(`/admin/users${buildQueryString(params)}`),
@@ -97,4 +109,16 @@ export const adminApi = {
 
   suspendBusiness: (id: string, reason?: string) =>
     apiFetch(`/admin/businesses/${id}/suspend`, { method: "POST", body: { reason } }),
+
+  /** Manual deal payments (PAYMENT_PROVIDER=manual), optionally by status. */
+  listTransactions: (status?: TransactionStatus) =>
+    apiFetch<AdminTransaction[]>(`/admin/transactions${buildQueryString({ status })}`),
+
+  /** Funds arrived: moves the deal TRANSACTION → TRANSFER. */
+  confirmTransaction: (id: string) =>
+    apiFetch<Transaction>(`/admin/transactions/${id}/confirm`, { method: "POST" }),
+
+  /** Funds did not arrive: back to the buyer to pay again. */
+  rejectTransaction: (id: string, reason?: string) =>
+    apiFetch<Transaction>(`/admin/transactions/${id}/reject`, { method: "POST", body: { reason } }),
 };
