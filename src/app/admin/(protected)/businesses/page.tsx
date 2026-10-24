@@ -10,6 +10,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { useAdminBusinesses, useApproveBusiness, useRejectBusiness, useSuspendBusiness } from "@/hooks/use-admin";
 import { formatCompactMoney, formatDate } from "@/lib/utils/format";
 import { useTranslation } from "@/i18n/client";
+import { friendlyErrorMessage } from "@/lib/api/error";
 import { toast } from "sonner";
 
 export default function AdminBusinessesPage() {
@@ -25,7 +26,7 @@ export default function AdminBusinessesPage() {
       { id },
       {
         onSuccess: () => toast.success(t(successKey)),
-        onError: () => toast.error(t("unableToLoad")),
+        onError: (error) => toast.error(friendlyErrorMessage(error, t)),
       },
     );
   }

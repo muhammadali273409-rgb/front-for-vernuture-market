@@ -124,14 +124,6 @@ export const documentCategoryKey: Record<string, string> = {
 
 export const DOCUMENT_CATEGORIES = Object.keys(documentCategoryKey);
 
-/** Due-diligence checklist category, dashboard due-diligence page (`deals:categories.*`). */
-export const dueDiligenceCategoryKey: Record<string, string> = {
-  Financials: "financials",
-  Technology: "technology",
-  Legal: "legal",
-  Operations: "operations",
-};
-
 /** Financial-metric verification status (`business:metric.verificationStatus.*`). */
 export const metricVerificationStatusKey: Record<string, string> = {
   VERIFIED: "verified",

@@ -325,11 +325,20 @@ export interface Message {
   editedAt: string | null;
 }
 
+export type DealParticipantRole =
+  | "BUYER"
+  | "SELLER"
+  | "BUYER_ADVISOR"
+  | "SELLER_ADVISOR"
+  | "LAWYER"
+  | "ACCOUNTANT";
+
 export interface DealParticipant {
   userId: string;
   user?: OfferParty;
-  role: string;
+  role: DealParticipantRole;
   ndaStatus: string;
+  ndaSignedAt?: string | null;
 }
 
 export interface DealTask {
@@ -345,8 +354,10 @@ export interface DealTask {
 export interface DealTimelineEvent {
   id: string;
   dealId: string;
+  /** e.g. DEAL_STATUS_CHANGED, NDA_SIGNED, AGREEMENT_SIGNED — labelled via `deals:events.*`. */
   type: string;
-  message: string;
+  actorId: string | null;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
 }
 
@@ -362,6 +373,8 @@ export interface Deal {
   /** Set when the seller confirms the business was handed over (TRANSFER stage). */
   sellerTransferConfirmedAt?: string | null;
   buyerReceiptConfirmedAt?: string | null;
+  /** The agreed price (GET /deals/:id only). */
+  acceptedOffer?: { amount: number; currency: string };
   participants: DealParticipant[];
   tasks?: DealTask[];
   timelineEvents?: DealTimelineEvent[];
@@ -369,19 +382,35 @@ export interface Deal {
   updatedAt: string;
 }
 
+export type DueDiligenceCategory =
+  | "BUSINESS"
+  | "FINANCIAL"
+  | "CUSTOMERS"
+  | "TECHNOLOGY"
+  | "LEGAL"
+  | "IP"
+  | "OPERATIONS";
+
 export interface DueDiligenceItem {
   id: string;
   requestId: string;
-  category: string;
-  title: string;
+  /** What the buyer asked for. */
+  description: string;
   status: DueDiligenceStatus;
-  notes: string | null;
+  /** Deal document the seller attached as evidence. */
+  documentId: string | null;
+  /** The seller's written answer. */
+  response: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DueDiligenceRequest {
   id: string;
   dealId: string;
+  category: DueDiligenceCategory;
   title: string;
+  requestedById: string;
   items: DueDiligenceItem[];
   createdAt: string;
 }
@@ -453,38 +482,79 @@ export interface OrganizationMember {
   user?: OfferParty;
 }
 
-export type AgreementStatus = "DRAFT" | "PENDING_SIGNATURES" | "SIGNED" | "VOID";
+export type AgreementStatus = "DRAFT" | "PENDING_SIGNATURE" | "PARTIALLY_SIGNED" | "SIGNED" | "VOID";
+
+export interface AgreementSignature {
+  id: string;
+  userId: string;
+  signedAt: string;
+}
 
 export interface AgreementVersion {
   id: string;
   agreementId: string;
   version: number;
-  content: string;
+  /** External link to the contract, when it wasn't uploaded. */
+  contentUrl: string | null;
+  /** SHA-256 (hex) of the uploaded file. */
+  contentHash: string | null;
+  /** Uploaded deal document (PDF) holding this version. */
+  documentId: string | null;
   createdById: string;
   createdAt: string;
-  signatures?: { userId: string; signedAt: string }[];
+  signatures: AgreementSignature[];
 }
 
 export interface Agreement {
   id: string;
   dealId: string;
   title: string;
-  type: string;
   status: AgreementStatus;
-  versions?: AgreementVersion[];
+  generatedByAI: boolean;
+  reviewRequired: boolean;
+  /** Newest version first. */
+  versions: AgreementVersion[];
   createdAt: string;
 }
 
-export type TransactionStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "REFUNDED";
+export type TransactionStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "REQUIRES_ACTION"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED"
+  | "REFUNDED";
+
+export type PaymentProvider = "manual" | "stripe";
+
+export interface TransactionEvent {
+  id: string;
+  type: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+}
 
 export interface Transaction {
   id: string;
   dealId: string;
+  /** Major units (e.g. dollars). */
   amount: number;
+  amountMinor: string;
   currency: string;
   status: TransactionStatus;
+  provider: PaymentProvider | null;
+  providerRef: string | null;
+  events?: TransactionEvent[];
+  /** Stripe only: where to send the buyer to pay. */
+  checkoutUrl?: string;
   createdAt: string;
-  completedAt: string | null;
+  updatedAt: string;
+}
+
+export interface PaymentConfig {
+  provider: PaymentProvider;
+  manualInstructions: string;
 }
 
 export interface BillingPlan {

@@ -1,20 +1,28 @@
 import { apiFetch } from "@/lib/api/client";
-import type { DueDiligenceItem, DueDiligenceRequest, DueDiligenceStatus } from "@/types/domain";
+import type {
+  DueDiligenceCategory,
+  DueDiligenceItem,
+  DueDiligenceRequest,
+  DueDiligenceStatus,
+} from "@/types/domain";
 
 export interface CreateDueDiligenceRequestInput {
+  category: DueDiligenceCategory;
   title: string;
-  items?: { category: string; title: string }[];
+  /** One description per requested item (at least one). */
+  items: string[];
 }
 
 export interface UpdateDueDiligenceItemInput {
   status: DueDiligenceStatus;
-  notes?: string;
+  /** Seller side only: a document of this business to share as evidence. */
+  documentId?: string;
+  /** Seller side only: written answer. */
+  response?: string;
 }
 
 /**
- * `list` (GET /deals/{dealId}/due-diligence) already lives on `dealsApi.listDueDiligence` —
- * kept there to avoid churning existing call sites. This module covers the two
- * write endpoints that weren't implemented yet.
+ * `list` (GET /deals/{dealId}/due-diligence) lives on `dealsApi.listDueDiligence`.
  */
 export const dueDiligenceApi = {
   create: (dealId: string, input: CreateDueDiligenceRequestInput) =>
