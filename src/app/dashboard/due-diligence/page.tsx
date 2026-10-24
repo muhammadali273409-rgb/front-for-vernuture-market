@@ -11,12 +11,15 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDeals } from "@/hooks/use-deals";
 import { dealsApi } from "@/lib/api/deals";
-import { dueDiligenceCategoryKey, dueDiligenceStatusKey } from "@/lib/utils/labels";
+import { dueDiligenceStatusKey } from "@/lib/utils/labels";
+import { dueDiligenceProgress } from "@/lib/deals/flow";
 import { useTranslation } from "@/i18n/client";
 import { cn } from "@/lib/utils";
-import type { DueDiligenceItem } from "@/types/domain";
+import type { DueDiligenceCategory, DueDiligenceItem } from "@/types/domain";
 
-const CATEGORIES = ["Financials", "Technology", "Legal", "Operations"];
+const CATEGORIES: DueDiligenceCategory[] = ["FINANCIAL", "LEGAL", "TECHNOLOGY", "OPERATIONS"];
+
+type ItemWithRequest = DueDiligenceItem & { category: DueDiligenceCategory; requestTitle: string; dealId: string };
 
 export default function DueDiligencePage() {
   const { t } = useTranslation("deals");
@@ -33,7 +36,11 @@ export default function DueDiligencePage() {
 
   const isLoading = dealsLoading || requestQueries.some((q) => q.isLoading);
   const isError = dealsError || requestQueries.some((q) => q.isError);
-  const items: DueDiligenceItem[] = requestQueries.flatMap((q) => q.data ?? []).flatMap((req) => req.items);
+  const items: ItemWithRequest[] = requestQueries
+    .flatMap((q) => q.data ?? [])
+    .flatMap((req) =>
+      req.items.map((item) => ({ ...item, category: req.category, requestTitle: req.title, dealId: req.dealId })),
+    );
 
   if (isLoading) {
     return (
@@ -69,18 +76,17 @@ export default function DueDiligencePage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {CATEGORIES.map((cat) => {
               const catItems = items.filter((i) => i.category === cat);
-              const approved = catItems.filter((i) => i.status === "APPROVED").length;
-              const pct = catItems.length > 0 ? Math.round((approved / catItems.length) * 100) : 0;
+              const { closed, percent: pct } = dueDiligenceProgress(catItems);
 
               return (
                 <Card key={cat} className="border border-border/80 bg-card p-4 space-y-2">
                   <div className="flex items-center justify-between text-xs font-semibold text-foreground">
-                    <span>{t(`categories.${dueDiligenceCategoryKey[cat]}`)}</span>
+                    <span>{t(`flow.ddCategory.${cat}`)}</span>
                     <span className="font-mono">{catItems.length > 0 ? `${pct}%` : "—"}</span>
                   </div>
                   <Progress value={pct} className="h-1.5" />
                   <p className="text-[11px] text-muted-foreground font-mono">
-                    {t("itemsVerifiedCount", { approved, total: catItems.length })}
+                    {t("itemsVerifiedCount", { approved: closed, total: catItems.length })}
                   </p>
                 </Card>
               );
@@ -100,11 +106,12 @@ export default function DueDiligencePage() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="text-[10px] font-mono uppercase">
-                        {t(`categories.${dueDiligenceCategoryKey[item.category] ?? item.category}`)}
+                        {t(`flow.ddCategory.${item.category}`, { defaultValue: item.category })}
                       </Badge>
-                      <h4 className="font-semibold text-foreground">{item.title}</h4>
+                      <h4 className="font-semibold text-foreground">{item.description}</h4>
                     </div>
-                    {item.notes && <p className="text-[11px] text-muted-foreground">{item.notes}</p>}
+                    <p className="text-[11px] text-muted-foreground">{item.requestTitle}</p>
+                    {item.response && <p className="text-[11px] text-muted-foreground">{item.response}</p>}
                   </div>
 
                   <div className="shrink-0">
